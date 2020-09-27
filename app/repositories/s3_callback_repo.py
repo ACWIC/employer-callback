@@ -2,8 +2,8 @@ import os
 import boto3
 from typing import Any
 import uuid
-from app.repositories.enrolment_repo import EnrolmentRepo
-from app.domain.entities.enrolment_authorisation import EnrolmentAuthorisation
+from app.repositories.callback_repo import CallbackRepo
+from app.domain.entities.callback import Callback
 
 connection_data = {
     'aws_access_key_id': os.environ.get(
@@ -19,26 +19,24 @@ connection_data = {
 }
 
 
-class S3EnrolmentRepo(EnrolmentRepo):
+class S3CallbackRepo(CallbackRepo):
     s3: Any
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.s3 = boto3.client('s3', **connection_data)
 
-    def save_enrolment(self, course_id, student_id):
+    def save_callback(self):
         # Create a submission uuid
-        enrolment = EnrolmentAuthorisation(
-            uuid=uuid.uuid4(),
-            course_id=course_id,
-            student_id=student_id
+        callback = Callback(
+            uuid=uuid.uuid4()
         )
 
         # Write directory to bucket
         self.s3.put_object(
-            Body=bytes(enrolment.json(), 'utf-8'),
-            Key=f'{enrolment.uuid}.json',
-            Bucket=os.environ['ENROLMENT_AUTHORISATION_BUCKET']
+            Body=bytes(callback.json(), 'utf-8'),
+            Key=f'{callback.uuid}.json',
+            Bucket=os.environ['CALLBACK_BUCKET']
         )
 
-        return enrolment
+        return callback

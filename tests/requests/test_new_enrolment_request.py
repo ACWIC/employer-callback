@@ -1,15 +1,12 @@
-from app.requests.enrolment_requests import NewEnrolmentRequest
+from app.requests.callback_requests import NewCallbackRequest
 
 
-def test_new_enrolment_request():
+def test_new_callback_request():
     """
-    When a NewEnrollmentRequest is instantiated,
+    When a NewCallbackRequest is instantiated,
     the resulting object should have correct attribute values.
     """
-    request = NewEnrolmentRequest(
-        student_id='some-student-id',
-        course_id='course'
-    )
+    request = NewCallbackRequest()
 
-    assert request.student_id == 'some-student-id'
-    assert request.course_id == 'course'
+    # TODO: assert what we know about callback requests
+    # grep for TODO...

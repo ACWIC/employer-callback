@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from app.api.enrolments import router as v1_router
+from app.api.callbacks import router as v1_router
 
 app = FastAPI(
     title='Enrolments API',

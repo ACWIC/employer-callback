@@ -1,22 +1,18 @@
-import app.domain.entities.enrolment_authorisation as ea
+import app.domain.entities.callback as cb
 from uuid import uuid4
 
 
-def test_enrolment_authorisation_init():
+def test_callback_authorisation_init():
     """
-    Ensure the enrollment data matches constructor values
+    Ensure the callback data matches constructor values
     and the status is appropriately set.
     """
-    enrolment_id = uuid4()
-    enrolment = ea.EnrolmentAuthorisation(
-        uuid=enrolment_id,
-        course_id='course-id',
-        student_id='1234'
+    callback_id = uuid4()
+    callback = cb.Callback(
+        uuid=callback_id,
     )
+    # TODO: callback needs a "key" attribute
+    # which is used like a password
+    # TODO: callback needs to identify the enrolment by ID
 
-    assert enrolment.uuid == enrolment_id
-    assert enrolment.student_id == '1234'
-    assert enrolment.course_id == 'course-id'
-    # TODO: make a statehart for documentation
-    # then test it - probably not lodged unti lodgement!
-    assert enrolment.status == ea.EnrolmentStatus.lodged
+    assert callback.uuid == callback_id

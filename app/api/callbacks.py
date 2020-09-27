@@ -1,30 +1,24 @@
 from fastapi import APIRouter
-from app.requests.enrolment_requests import NewEnrolmentRequest
-from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
-from app.use_cases.create_new_enrolment import CreateNewEnrolment
+from app.requests.callback_requests import NewCallbackRequest
+from app.repositories.s3_callback_repo import S3CallbackRepo
+from app.use_cases.create_new_callback import CreateNewCallback
 
 
 router = APIRouter()
 
 
-@router.get('/enrolments/{enrolment_id}')
-def enrolments(enrolment_id: str):
-    ''' Getting an enrollment by ID will return the current
-        state of the enrollment, derived from the enrollment’s journal.
+@router.post("/callbacks")
+def create_callback(inputs: NewCallbackRequest):
+    ''' Posting a callback is a synchronous proccess that
+        immediately succeeds (or fails).
+
+    TODO: the callback needs a enrollmentID
+    TODO: validate the enrollmentID
+    TODO: validate the keys/sig (Auth)
+    TODO: draft schema, and validate against it
     '''
-    return {"your_enrolment_id": enrolment_id}
-
-
-@router.post("/enrolments")
-def create_enrolment(inputs: NewEnrolmentRequest):
-    ''' Posting an enrollment authorisation is a synchronous proccess that
-        immediately succeeds (or fails) to create an enrollment authorisation,
-        and assign it a unique enrollment authorisation id.
-
-        The initial state of the enrollment authorisation is “lodged”.
-    '''
-    enrolment_repo = S3EnrolmentRepo()
-    use_case = CreateNewEnrolment(enrolment_repo=enrolment_repo)
+    callback_repo = S3CallbackRepo()
+    use_case = CreateNewCallback(callback_repo=callback_repo)
     response = use_case.execute(inputs)
 
     return response
