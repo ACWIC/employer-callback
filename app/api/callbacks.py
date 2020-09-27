@@ -7,8 +7,8 @@ from app.use_cases.create_new_callback import CreateNewCallback
 router = APIRouter()
 
 
-@router.post("/callbacks/{enrolmentID}")
-def create_callback(enrolmentID: str, inputs: NewCallbackRequest):
+@router.post("/callbacks")
+def create_callback(inputs: NewCallbackRequest):
     ''' Posting a callback is a synchronous proccess that
         immediately succeeds (or fails).
 
@@ -18,6 +18,6 @@ def create_callback(enrolmentID: str, inputs: NewCallbackRequest):
     '''
     callback_repo = S3CallbackRepo()
     use_case = CreateNewCallback(callback_repo=callback_repo)
-    response = use_case.execute(enrolmentID, inputs)
+    response = use_case.execute(inputs)
 
     return response

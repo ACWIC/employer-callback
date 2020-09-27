@@ -37,7 +37,7 @@ class S3CallbackRepo(CallbackRepo):
         # Write directory to bucket
         self.s3.put_object(
             Body=bytes(cb.json(), 'utf-8'),
-            Key=f'{cb.enrolment_id}/{cb.callback_id}.json',
+            Key=f'{cb.enrolment_id}/{cb.callback_id}.json',  # Key=f'{cb.enrolment_id}/{cb.callback_id}.json',
             Bucket=os.environ['CALLBACK_BUCKET']
         )
 

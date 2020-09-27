@@ -16,7 +16,12 @@ class CreateNewCallback(BaseModel):
 
     def execute(self, request: NewCallbackRequest):
         try:
-            callback = self.callback_repo.save_callback(request)
+            # TODO: validate enrolment_id
+            # TODO: validate key for enrolment_id
+            callback = self.callback_repo.save_callback(
+                enrolment_id=request.enrolment_id,
+                key=request.key
+            )
         except Exception as e:  # noqa - TODO: handle specific failure types
             return ResponseFailure.build_from_resource_error(message=e)
 
