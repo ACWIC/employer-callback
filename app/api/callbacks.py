@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.requests.callback_requests import NewCallbackRequest
+from app.requests.callback_requests import CallbackRequest
 from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.use_cases.create_new_callback import CreateNewCallback
 
@@ -8,15 +8,18 @@ router = APIRouter()
 
 
 @router.post("/callbacks")
-def create_callback(inputs: NewCallbackRequest):
-    '''
+def create_callback(inputs: CallbackRequest):
+    ''' Message from Training Provider to Employer.
 
-    Posting a callback is a synchronous proccess that
-    immediately succeeds (or fails).
+    Contains information about the delivery of training services,
+    is linked to student identity and employer context by enrolment_id.
+
+    POSTing a callback is a synchronous proccess
+    that immediately succeeds (or fails).
 
     The API validates the callback:
 
-    * The posted payload must confirm with the NewCallbackRequest schema.
+    * The posted payload must confirm with the CallbackRequest schema.
     * The enrollment_id parameter must be well known to the employer.
       This is a kind of "correlation id" used to associate messages.
     * The provided key must be valid for that enrolment_id.

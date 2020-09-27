@@ -1,11 +1,13 @@
 """
 These tests evaluate (and document) the business logic.
 """
+from datetime import datetime
+import random
 from uuid import uuid4
 from unittest import mock
 from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
-from app.requests.callback_requests import NewCallbackRequest
+from app.requests.callback_requests import CallbackRequest
 from app.use_cases.create_new_callback import CreateNewCallback
 
 
@@ -20,17 +22,24 @@ def test_create_new_callback_success():
     cb_id = uuid4()
     enrl_id = 'dummy_enrolment_id'
     key = 'dummy_enrolment_key'
-
+    tp_ref = random.randint(0, 99999)
+    rx = datetime.now()
+    pl = {"data": "blbnjsd;fnbs"}
     callback = Callback(
         callback_id=cb_id,
         enrolment_id=enrl_id,
-        key=key
+        key=key,
+        tp_sequence=tp_ref,
+        received=rx,
+        payload=pl
     )
     repo.save_callback.return_value = callback
 
-    request = NewCallbackRequest(
+    request = CallbackRequest(
         enrolment_id=enrl_id,
-        key=key
+        key=key,
+        tp_sequence=tp_ref,
+        payload=pl
     )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)
@@ -47,11 +56,15 @@ def test_create_new_callback_failure():
     repo = mock.Mock(spec=CallbackRepo)
     enrl_id = 'dummy_enrolment_id'
     key = 'dummy_enrolment_key'
-
+    tp_ref = 534
+    pl = {"brace": "yourself"}
     repo.save_callback.side_effect = Exception()
-    request = NewCallbackRequest(
+
+    request = CallbackRequest(
         enrolment_id=enrl_id,
-        key=key
+        key=key,
+        tp_sequence=tp_ref,
+        payload=pl
     )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)

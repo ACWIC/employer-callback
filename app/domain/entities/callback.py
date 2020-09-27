@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from uuid import UUID
 from pydantic import BaseModel
@@ -5,8 +6,8 @@ from pydantic import BaseModel
 
 class Callback(BaseModel):
     callback_id: UUID
+    received: datetime
     enrolment_id: str
     key: str
-    # TODO: multiple things to add here
-    # grep for TODO elseware :)
-    # this is the documented model
+    tp_sequence: int
+    payload: dict

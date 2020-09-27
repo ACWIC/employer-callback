@@ -1,5 +1,6 @@
 import os
 import boto3
+from datetime import datetime
 from typing import Any
 import uuid
 from app.repositories.callback_repo import CallbackRepo
@@ -26,18 +27,23 @@ class S3CallbackRepo(CallbackRepo):
         super().__init__(**kwargs)
         self.s3 = boto3.client('s3', **connection_data)
 
-    def save_callback(self, enrolment_id: str, key: str):
-        # do something good with the cb_request
+    def save_callback(self, enrolment_id: str,
+                      key: str,
+                      tp_sequence: int,
+                      payload: dict):
+
         cb = Callback(
             callback_id=uuid.uuid4(),
             enrolment_id=enrolment_id,
-            key=key
+            key=key,
+            received=datetime.now(),
+            tp_sequence=tp_sequence,
+            payload=payload
         )
 
-        # Write directory to bucket
         self.s3.put_object(
             Body=bytes(cb.json(), 'utf-8'),
-            Key=f'{cb.enrolment_id}/{cb.callback_id}.json',  # Key=f'{cb.enrolment_id}/{cb.callback_id}.json',
+            Key=f'{cb.enrolment_id}/{cb.callback_id}.json',
             Bucket=os.environ['CALLBACK_BUCKET']
         )
 

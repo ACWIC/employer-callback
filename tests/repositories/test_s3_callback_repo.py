@@ -29,12 +29,16 @@ def test_save_callback(boto_client, uuid4):
     """
     callback_id = UUID('1dad3dd8-af28-4e61-ae23-4c93a456d10e')
     uuid4.return_value = callback_id
-    enrolment_id = 'the_employer_generated_this_identifier'
-    key = 'the_employer_generated_this_secret'
-
+    e_id = 'the_employer_generated_this_identifier'
+    k = 'the_employer_generated_this_secret'
+    tp_seq = 9876543
+    pl = {"say": "what?"}
     repo = S3CallbackRepo()
     environ['CALLBACK_BUCKET'] = 'some-bucket'
-    callback = repo.save_callback(enrolment_id, key)
+    callback = repo.save_callback(
+        enrolment_id=e_id, key=k,
+        tp_sequence=tp_seq, payload=pl
+    )
 
     # TODO: assert enrollment is of the appropriate domain model type
     assert callback.callback_id == callback_id
