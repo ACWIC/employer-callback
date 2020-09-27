@@ -1,0 +1,55 @@
+version: '3.2'
+
+volumes:
+  minio_data: {}
+
+services:
+  uvicorn: &uvicorn
+    build:
+      context: .
+      dockerfile: ./compose/local/uvicorn/Dockerfile
+    image: local_enrolments_api_app
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./.envs/.local/.minio
+    depends_on:
+      - minio
+    command: /start
+
+  test:
+    <<: *uvicorn
+    image: local_enrolments_api_test
+    command: python -m pytest
+
+  serverless:
+    build:
+      context: .
+      dockerfile: ./compose/local/serverless/Dockerfile
+    image: local_enrolments_sls
+    volumes:
+      - .:/app
+      - ~/.aws:/root/.aws
+    ports:
+      - "3000:3000"
+    depends_on:
+      - minio
+    env_file:
+      - ./.envs/.local/.sls
+      - ./.envs/.local/.minio
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    command: offline --host 0.0.0.0
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9001:9000"
+    env_file:
+      - ./.envs/.local/.minio
+    volumes:
+      - minio_data:/data
+    command: server /data

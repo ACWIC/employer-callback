@@ -1,0 +1,13 @@
+-r base.txt
+uvicorn==0.11.8
+
+# testing
+tox
+coverage
+pytest
+pytest-cov
+pytest-sugar
+pytest-flake8
+
+# debugging
+ipython

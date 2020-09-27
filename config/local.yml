@@ -1,0 +1,3 @@
+s3AccessKeyId: ${env:S3_ACCESS_KEY_ID}
+s3SecretAccessKey: ${env:S3_SECRET_ACCESS_KEY}
+s3EndpointUrl: ${env:S3_ENDPOINT_URL}
