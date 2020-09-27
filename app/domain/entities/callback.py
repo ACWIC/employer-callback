@@ -4,6 +4,9 @@ from pydantic import BaseModel
 
 
 class Callback(BaseModel):
-    uuid: UUID
+    callback_id: UUID
+    enrolment_id: str
+    key: str
     # TODO: multiple things to add here
     # grep for TODO elseware :)
+    # this is the documented model

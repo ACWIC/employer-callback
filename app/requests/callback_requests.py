@@ -2,4 +2,5 @@ from app.requests import ValidRequest
 
 
 class NewCallbackRequest(ValidRequest):
-    pass
+    enrolment_id: str
+    key: str

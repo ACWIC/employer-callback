@@ -6,7 +6,7 @@ from app.responses import ResponseSuccess
 
 
 class CreateNewCallback(BaseModel):
-    callback_repo: CallbackRepo  # do we really need this?
+    callback_repo: CallbackRepo  # class attribute (singleton)
 
     class Config:
         # Pydantic will complain if something (enrolment_repo) is defined
@@ -16,7 +16,7 @@ class CreateNewCallback(BaseModel):
 
     def execute(self, request: NewCallbackRequest):
         try:
-            callback = self.callback_repo.save_callback()
+            callback = self.callback_repo.save_callback(request)
         except Exception as e:  # noqa - TODO: handle specific failure types
             return ResponseFailure.build_from_resource_error(message=e)
 

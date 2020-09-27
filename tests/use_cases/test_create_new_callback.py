@@ -16,12 +16,22 @@ def test_create_new_callback_success():
     the response type should be "Success".
     """
     repo = mock.Mock(spec=CallbackRepo)
+    # dummy data
+    cb_id = uuid4()
+    enrl_id = 'dummy_enrolment_id'
+    key = 'dummy_enrolment_key'
+
     callback = Callback(
-        uuid=uuid4()
+        callback_id=cb_id,
+        enrolment_id=enrl_id,
+        key=key
     )
     repo.save_callback.return_value = callback
 
-    request = NewCallbackRequest()
+    request = NewCallbackRequest(
+        enrolment_id=enrl_id,
+        key=key
+    )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)
 
@@ -35,9 +45,14 @@ def test_create_new_callback_failure():
     the response type should be "ResourceError".
     """
     repo = mock.Mock(spec=CallbackRepo)
+    enrl_id = 'dummy_enrolment_id'
+    key = 'dummy_enrolment_key'
 
     repo.save_callback.side_effect = Exception()
-    request = NewCallbackRequest()
+    request = NewCallbackRequest(
+        enrolment_id=enrl_id,
+        key=key
+    )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)
 

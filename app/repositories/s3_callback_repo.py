@@ -26,17 +26,19 @@ class S3CallbackRepo(CallbackRepo):
         super().__init__(**kwargs)
         self.s3 = boto3.client('s3', **connection_data)
 
-    def save_callback(self):
-        # Create a submission uuid
-        callback = Callback(
-            uuid=uuid.uuid4()
+    def save_callback(self, enrolment_id: str, key: str):
+        # do something good with the cb_request
+        cb = Callback(
+            callback_id=uuid.uuid4(),
+            enrolment_id=enrolment_id,
+            key=key
         )
 
         # Write directory to bucket
         self.s3.put_object(
-            Body=bytes(callback.json(), 'utf-8'),
-            Key=f'{callback.uuid}.json',
+            Body=bytes(cb.json(), 'utf-8'),
+            Key=f'{cb.enrolment_id}/{cb.callback_id}.json',
             Bucket=os.environ['CALLBACK_BUCKET']
         )
 
-        return callback
+        return cb
