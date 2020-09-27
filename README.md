@@ -61,6 +61,8 @@ is used to deploy with).
 **A note about local resources**
 
 Serverless will not auto-create S3 buckets in minio, so this must be done manually first.
+See the configuration in .envs/.local/.sls to determine what buckets are needed.
+
 
 ### Deploying
 ```
