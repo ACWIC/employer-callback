@@ -41,6 +41,10 @@ def create_callback(inputs: CallbackRequest):
       against which the payload could be validated.
       It could also be used by the recipient
       to process the data that is sent to them.
+    * Currently, the "payload" is a dictionary
+      (list of key/value pairs).
+      Probably better for it to be a base64 encoded string,
+      which would support arbitrary message-types in the future.
     * Document idempotency; If we have this already,
       we respond as though this is the first time we ever saw it.
       Astute repeat senders may notice the wall-clock is a bit odd.
