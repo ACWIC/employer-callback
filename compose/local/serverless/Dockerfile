@@ -2,7 +2,7 @@ FROM python:3.8.5-alpine
 
 RUN apk update \
     # node12, npm depedencies
-    && apk add nodejs=12.18.3-r0 npm=12.18.3-r0 \
+    && apk add nodejs npm \
     # (python)magnum:cryptography dependencies
     && apk add gcc musl-dev python3-dev libffi-dev openssl-dev
 
