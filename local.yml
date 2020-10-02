@@ -24,26 +24,6 @@ services:
     image: local_enrolments_api_test
     command: python -m pytest
 
-  serverless:
-    build:
-      context: .
-      dockerfile: ./compose/local/serverless/Dockerfile
-    image: local_enrolments_sls
-    volumes:
-      - .:/app
-      - ~/.aws:/root/.aws
-    ports:
-      - "3000:3000"
-    depends_on:
-      - minio
-    env_file:
-      - ./.envs/.local/.sls
-      - ./.envs/.local/.minio
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    command: offline --host 0.0.0.0
-
   minio:
     image: minio/minio:latest
     ports:
