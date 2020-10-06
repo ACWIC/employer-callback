@@ -28,13 +28,20 @@ everything required for the components to work together.
 
 
 ### Running locally
+
+For running locally, it's required to include `.envs/.local/.sls` to `app` service. It might be achieved adding this line to `local.yml` under `app` service's `env_file`:
+
+    - ./.envs/.local/.sls
+
+Containers might be run:
+
 ```
 docker-compose up
 ```
 
-The service will be available on port 8081
+The service will be available on port 8081, and minio will be available on port 9001.
 
-Open `localhost:8081/docs` for swagger documentation.
+Open `localhost:8081/docs` for swagger documentation, `localhost:9001/minio` for minio.
 
 ## Configuration:
 
