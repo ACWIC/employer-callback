@@ -24,7 +24,7 @@ class CreateNewCallback(BaseModel):
             enrolment_object = self.enrolment_repo.get_enrolment_by_id(request.enrolment_id)
             if not enrolment_object:
                 return ResponseFailure.build_from_resource_error(message="'enrolment_id' doesn't exist!")
-            if enrolment_object.key != request.key:
+            if enrolment_object[1] != request.key:
                 return ResponseFailure.build_from_resource_error(message="'shared_secret' key doesn't match")
 
             callback = self.callback_repo.save_callback(

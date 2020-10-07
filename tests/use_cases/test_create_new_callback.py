@@ -96,14 +96,15 @@ def test_create_new_callback_failure():
 def test_create_new_callback_failure_on_invalid_enrolment_id():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
+    enrl_id = uuid4()
     invalid_enrl_id = uuid4()
     key = uuid4()
     tp_ref = 534
     pl = {}
-    enrolment_repo.get_enrolment_by_id.side_effect = Exception("'enrolment_id' doesn't exist!")
+    enrolment_repo.get_enrolment_by_id.side_effect = None
 
     request = CallbackRequest(
-        enrolment_id=invalid_enrl_id,
+        enrolment_id=enrl_id,
         key=key,
         tp_sequence=tp_ref,
         payload=pl,
@@ -112,20 +113,25 @@ def test_create_new_callback_failure_on_invalid_enrolment_id():
     response = use_case.execute(request)
 
     assert response.status_code == FailureType.RESOURCE_ERROR
-    assert response.message == "Exception: 'enrolment_id' doesn't exist!"
+    assert response.message == "'enrolment_id' doesn't exist!"
 
 
 def test_create_new_callback_failure_on_invalid_shared_secret():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
-    invalid_enrl_id = uuid4()
+    enrl_id = uuid4()
     key = uuid4()
+    invalid_key = uuid4()
     tp_ref = 534
     pl = {}
-    enrolment_repo.get_enrolment_by_id.side_effect = Exception("'shared_secret' key doesn't match")
+    enrolment = Enrolment(
+        enrolment_id=enrl_id,  # Use the correct key for enrolment id
+        key=invalid_key,
+    )
+    enrolment_repo.get_enrolment_by_id.side_effect = enrolment
 
     request = CallbackRequest(
-        enrolment_id=invalid_enrl_id,
+        enrolment_id=enrl_id,
         key=key,
         tp_sequence=tp_ref,
         payload=pl,
@@ -134,4 +140,4 @@ def test_create_new_callback_failure_on_invalid_shared_secret():
     response = use_case.execute(request)
 
     assert response.status_code == FailureType.RESOURCE_ERROR
-    assert response.message == "Exception: 'shared_secret' key doesn't match"
+    assert response.message == "'shared_secret' key doesn't match"

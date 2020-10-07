@@ -35,9 +35,8 @@ class S3EnrolmentRepo(EnrolmentRepo):
                 Bucket=enrolment_bucket,
                 Key=enrolment_id,
             )
-            if not isinstance(enrolment_obj, Enrolment):
-                print(f"Wrong type! {type(enrolment_obj)}")
-                raise Exception(f"Wrong type! {type(enrolment_obj)}")
+            # TODO: fetch object to make it the same format with Enrolment domain
             return enrolment_obj
-        except Exception as e:
-            print(f"Error! Message: {e}")
+        except self.s3.exceptions.NoSuchKey:
+            print(f"'enrolment_id' doesn't exist!")
+            return None
