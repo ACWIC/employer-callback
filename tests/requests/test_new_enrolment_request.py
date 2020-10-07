@@ -11,15 +11,18 @@ def test_new_callback_request():
     e_id = 'employer_made_this'
     tp_seq = 76543567
     pl = {"days": "hapy"}
+    invalid = {}
 
     request = CallbackRequest(
         enrolment_id=e_id,
         key=key,
         tp_sequence=tp_seq,
-        payload=pl
+        payload=pl,
+        invalid=invalid
     )
 
     assert request.enrolment_id == e_id
     assert request.key == key
     assert request.tp_sequence == tp_seq
     assert request.payload == pl
+    assert request.invalid == invalid
