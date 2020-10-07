@@ -3,13 +3,18 @@ from pydantic import BaseModel
 from pydantic.typing import Literal
 
 
+class SuccessType(str, Enum):
+    SUCCESS = 200
+
+
 class FailureType(str, Enum):
-    RESOURCE_ERROR = 'ResourceError'
-    SYSTEM_ERROR = 'SystemError'
+    RESOURCE_ERROR = 404
+    SYSTEM_ERROR = 500
+    PARAMETER_ERROR = 400
 
 
 class ResponseFailure(BaseModel):
-    type: FailureType
+    status_code: FailureType
     message: str
 
     @classmethod
@@ -24,20 +29,20 @@ class ResponseFailure(BaseModel):
     @classmethod
     def build_from_resource_error(cls, message=None):
         return cls(
-            type=FailureType.RESOURCE_ERROR,
+            status_code=FailureType.RESOURCE_ERROR,
             message=cls._format_message(message)
         )
 
     @classmethod
     def build_from_system_error(cls, message=None):
         return cls(
-            type=FailureType.SYSTEM_ERROR,
+            status_code=FailureType.SYSTEM_ERROR,
             message=cls._format_message(message)
         )
 
 
 class ResponseSuccess(BaseModel):
-    type: Literal['Success'] = 'Success'
+    status_code: SuccessType.SUCCESS
     value: dict
 
     def __bool__(self):

@@ -6,3 +6,4 @@ class CallbackRequest(ValidRequest):
     key: str
     tp_sequence: int
     payload: dict
+    invalid: dict
