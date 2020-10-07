@@ -6,7 +6,9 @@ import random
 from uuid import uuid4
 from unittest import mock
 from app.domain.entities.callback import Callback
+from app.domain.entities.enrolment import Enrolment
 from app.repositories.callback_repo import CallbackRepo
+from app.repositories.enrolment_repo import EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
 from app.responses import FailureType, SuccessType
 from app.use_cases.create_new_callback import CreateNewCallback
@@ -18,11 +20,13 @@ def test_create_new_callback_success():
     if everything goes according to plan,
     the response type should be "Success".
     """
-    repo = mock.Mock(spec=CallbackRepo)
+    callback_repo = mock.Mock(spec=CallbackRepo)
+    enrolment_repo = mock.Mock(spec=EnrolmentRepo)
+
     # dummy data
     cb_id = uuid4()
-    enrl_id = 'dummy_enrolment_id'
-    key = 'dummy_enrolment_key'
+    enrl_id = uuid4()
+    key = uuid4()
     tp_ref = random.randint(0, 99999)
     rx = datetime.now()
     pl = {"data": "blbnjsd;fnbs"}
@@ -35,7 +39,12 @@ def test_create_new_callback_success():
         received=rx,
         payload=pl
     )
-    repo.save_callback.return_value = callback
+    enrolment = Enrolment(
+        enrolment_id=enrl_id,
+        key=key,
+    )
+    callback_repo.save_callback.return_value = callback
+    enrolment_repo.get_enrolment_by_id.return_value = enrolment
 
     request = CallbackRequest(
         enrolment_id=enrl_id,
@@ -44,7 +53,7 @@ def test_create_new_callback_success():
         payload=pl,
         invalid=invalid,
     )
-    use_case = CreateNewCallback(callback_repo=repo)
+    use_case = CreateNewCallback(callback_repo=callback_repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
     assert response.status_code == SuccessType.SUCCESS
@@ -56,22 +65,29 @@ def test_create_new_callback_failure():
     if there is some kind of error,
     the response type should be "ResourceError".
     """
-    repo = mock.Mock(spec=CallbackRepo)
-    enrl_id = 'dummy_enrolment_id'
-    key = 'dummy_enrolment_key'
+    callback_repo = mock.Mock(spec=CallbackRepo)
+    enrolment_repo = mock.Mock(spec=EnrolmentRepo)
+
+    # dummy data
+    cb_id = uuid4()
+    enrl_id = uuid4()
+    key = uuid4()
     tp_ref = 534
     pl = {"brace": "yourself"}
-    invalid = {}
-    repo.save_callback.side_effect = Exception()
+    enrolment = Enrolment(
+        enrolment_id=enrl_id,
+        key=key,
+    )
+    enrolment_repo.get_enrolment_by_id.return_value = enrolment
+    callback_repo.save_callback.side_effect = Exception()
 
     request = CallbackRequest(
         enrolment_id=enrl_id,
         key=key,
         tp_sequence=tp_ref,
         payload=pl,
-        invalid=invalid,
     )
-    use_case = CreateNewCallback(callback_repo=repo)
+    use_case = CreateNewCallback(callback_repo=callback_repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
     assert response.status_code == FailureType.RESOURCE_ERROR
@@ -79,45 +95,43 @@ def test_create_new_callback_failure():
 
 def test_create_new_callback_failure_on_invalid_enrolment_id():
     repo = mock.Mock(spec=CallbackRepo)
-    invalid_enrl_id = 123456789
-    key = 'shared_secret_key'
+    enrolment_repo = mock.Mock(spec=EnrolmentRepo)
+    invalid_enrl_id = uuid4()
+    key = uuid4()
     tp_ref = 534
     pl = {}
-    invalid = {}
-    # repo.save_callback.side_effect = Exception("'enrolment_id' doesn't exist!")
+    enrolment_repo.get_enrolment_by_id.side_effect = Exception("'enrolment_id' doesn't exist!")
 
     request = CallbackRequest(
         enrolment_id=invalid_enrl_id,
         key=key,
         tp_sequence=tp_ref,
         payload=pl,
-        invalid=invalid,
     )
-    use_case = CreateNewCallback(callback_repo=repo)
+    use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
     assert response.status_code == FailureType.RESOURCE_ERROR
-    assert response.message == "Exception: Resource Error! 'enrolment_id' doesn't exist!"
+    assert response.message == "Exception: 'enrolment_id' doesn't exist!"
 
 
 def test_create_new_callback_failure_on_invalid_shared_secret():
     repo = mock.Mock(spec=CallbackRepo)
-    invalid_enrl_id = "dummy_enrolment_id"
-    key = 'INVALID_SECRET_KEY'
+    enrolment_repo = mock.Mock(spec=EnrolmentRepo)
+    invalid_enrl_id = uuid4()
+    key = uuid4()
     tp_ref = 534
     pl = {}
-    invalid = {}
-    repo.save_callback.side_effect = Exception()
+    enrolment_repo.get_enrolment_by_id.side_effect = Exception("'shared_secret' key doesn't match")
 
     request = CallbackRequest(
         enrolment_id=invalid_enrl_id,
         key=key,
         tp_sequence=tp_ref,
         payload=pl,
-        invalid=invalid,
     )
-    use_case = CreateNewCallback(callback_repo=repo)
+    use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
     assert response.status_code == FailureType.RESOURCE_ERROR
-    assert response.message == "Exception: Resource Error! 'shared_secret' doesn't match"
+    assert response.message == "Exception: 'shared_secret' key doesn't match"
