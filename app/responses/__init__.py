@@ -42,7 +42,7 @@ class ResponseFailure(BaseModel):
 
 
 class ResponseSuccess(BaseModel):
-    status_code: SuccessType.SUCCESS
+    status_code = SuccessType.SUCCESS
     value: dict
 
     def __bool__(self):
