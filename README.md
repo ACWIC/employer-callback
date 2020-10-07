@@ -28,20 +28,13 @@ everything required for the components to work together.
 
 
 ### Running locally
-
-For running locally, it's required to include `.envs/.local/.sls` to `app` service. It might be achieved adding this line to `local.yml` under `app` service's `env_file`:
-
-    - ./.envs/.local/.sls
-
-Containers might be run:
-
 ```
 docker-compose up
 ```
 
-The service will be available on port 8081, and minio will be available on port 9001.
+The service will be available on port 8081
 
-Open `localhost:8081/docs` for swagger documentation, `localhost:9001/minio` for minio.
+Open `localhost:8081/docs` for swagger documentation.
 
 ## Configuration:
 
@@ -69,7 +62,25 @@ See the configuration in .envs/.local/.sls to determine what buckets are needed.
 
 ## Tests
 
-Tests are run with pytest, which can be executed with the following command:
+Tests are run with pytest, which can be executed with the shortcut make command:
 ```
-docker-compose run --rm app python -m pytest
+make test
 ```
+
+## Style guide
+We follow the guidelines offered by black, isort, and flake8
+
+### pre-commit
+We use pre-commit to enforce style checks before committing code in git.
+
+Please install it from [pre-commit](https://pre-commit.com/)
+then run `pre-commit install`
+
+Note that on the first time you run `git commit`, it's gonna take sometime 
+to install all the hooks, but after that it will be fast.
+
+to check your code style without having to do `git commit`, run:
+ 
+ `pre-commit run`: It will check your staged files, and print any issues
+ 
+ `pre-commit run -a`: It will check all the project files

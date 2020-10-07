@@ -1,0 +1,54 @@
+version: 2.1
+
+
+orbs:
+  python: circleci/python@1.1.0
+  codecov: codecov/codecov@1.0.2
+  flake8: arrai/flake8@6.0.0
+
+jobs:
+  build-and-test:
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+          pip-dependency-file: requirements/uvicorn.txt
+      - run:
+          command: |
+            mkdir test-results
+            python -m pytest
+          name: Test
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-reports
+          destination: reports
+      - codecov/upload:
+          file: test-reports/coverage.xml
+  code-style-checks:
+    # check https://github.com/marketplace/actions/flake8-annotator for adding github comments
+    executor: python/default
+    steps:
+      - checkout
+      - flake8/setup_flake8:
+          wd: .
+      - flake8/flake8_errors:
+          wd: .
+      - flake8/flake8_warnings:
+          wd: .
+  pre-commit-hooks:
+    executor: python/default
+    steps:
+      - checkout
+      - run:
+          command: |
+            pip install pre-commit
+            pre-commit run -a
+
+workflows:
+  main:
+    jobs:
+      - build-and-test
+      - code-style-checks
+      - pre-commit-hooks
