@@ -1,8 +1,8 @@
 from pydantic import BaseModel
+
 from app.repositories.callback_repo import CallbackRepo
 from app.requests.callback_requests import CallbackRequest
-from app.responses import ResponseFailure
-from app.responses import ResponseSuccess
+from app.responses import ResponseFailure, ResponseSuccess
 
 
 class CreateNewCallback(BaseModel):
@@ -22,7 +22,7 @@ class CreateNewCallback(BaseModel):
                 enrolment_id=request.enrolment_id,
                 key=request.key,
                 tp_sequence=request.tp_sequence,
-                payload=request.payload
+                payload=request.payload,
             )
         except Exception as e:  # noqa - TODO: handle specific failure types
             return ResponseFailure.build_from_resource_error(message=e)

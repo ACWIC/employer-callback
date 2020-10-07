@@ -1,6 +1,7 @@
-import app.domain.entities.callback as cb
 import datetime
 from uuid import uuid4
+
+import app.domain.entities.callback as cb
 
 
 def test_callback_init():
@@ -9,18 +10,18 @@ def test_callback_init():
     and the status is appropriately set.
     """
     cb_id = uuid4()
-    e_id = 'this-is-my-enrolment-id'
-    k = 'this-is-my-key'
+    e_id = "this-is-my-enrolment-id"
+    k = "this-is-my-key"
     tp_ref = 123456
     rx = datetime.datetime.now()
-    pl = {"ham":"eggs"}
+    pl = {"ham": "eggs"}
     callback = cb.Callback(
         callback_id=cb_id,
         enrolment_id=e_id,
         key=k,
         tp_sequence=tp_ref,
         received=rx,
-        payload=pl
+        payload=pl,
     )
 
     assert callback.callback_id == cb_id

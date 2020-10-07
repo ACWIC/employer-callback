@@ -1,4 +1,5 @@
 from typing import List
+
 from pydantic import BaseModel
 
 
@@ -11,7 +12,7 @@ class InvalidRequest(BaseModel):
     errors: List[InvalidRequestMessage] = []
 
     def add_error(self, parameter: str, message: str):
-        self.errors.append({'parameter': parameter, 'message': message})
+        self.errors.append({"parameter": parameter, "message": message})
 
     def has_errors(self) -> bool:
         return len(self.errors) > 0
