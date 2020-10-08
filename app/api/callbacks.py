@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.requests.callback_requests import CallbackRequest
@@ -56,5 +56,7 @@ def create_callback(inputs: CallbackRequest):
     callback_repo = S3CallbackRepo()
     use_case = CreateNewCallback(callback_repo=callback_repo)
     response = use_case.execute(inputs)
+    if bool(response) is False:  # If request failed
+        raise HTTPException(status_code=response.type, detail=response.message)
 
     return response
