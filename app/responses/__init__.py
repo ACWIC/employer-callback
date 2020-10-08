@@ -1,12 +1,16 @@
 from enum import Enum
 
 from pydantic import BaseModel
-from pydantic.typing import Literal
+
+
+class SuccessType(str, Enum):
+    SUCCESS = 200
 
 
 class FailureType(str, Enum):
-    RESOURCE_ERROR = "ResourceError"
-    SYSTEM_ERROR = "SystemError"
+    RESOURCE_ERROR = 404
+    SYSTEM_ERROR = 500
+    PARAMETER_ERROR = 400
 
 
 class ResponseFailure(BaseModel):
@@ -34,8 +38,8 @@ class ResponseFailure(BaseModel):
 
 
 class ResponseSuccess(BaseModel):
-    type: Literal["Success"] = "Success"
     value: dict
+    type = SuccessType.SUCCESS
 
     def __bool__(self):
         return True
