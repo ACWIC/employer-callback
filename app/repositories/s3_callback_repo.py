@@ -32,7 +32,7 @@ class S3CallbackRepo(CallbackRepo):
 
     def save_callback(
         self, enrolment_id: str, key: str, tp_sequence: int, payload: dict
-    ):
+    ) -> Callback:
 
         cb = Callback(
             callback_id=uuid.uuid4(),
