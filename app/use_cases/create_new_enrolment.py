@@ -20,11 +20,6 @@ class CreateNewEnrolment(BaseModel):
             enrolment = self.enrolment_repo.save_enrolment(
                 enrolment_id=request.enrolment_id,
             )
-            # Temp: For testing purpose
-            callback = self.enrolment_repo.save_callback(
-                enrolment_id=request.enrolment_id, key="", tp_sequence=1, payload={}
-            )
-            enrolment["callback"] = callback
         except Exception as e:  # noqa - TODO: handle specific failure types
             return ResponseFailure.build_from_resource_error(message=e)
 

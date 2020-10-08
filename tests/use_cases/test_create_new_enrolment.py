@@ -8,6 +8,7 @@ from uuid import uuid4
 from app.domain.entities.enrolment import Enrolment
 from app.repositories.enrolment_repo import EnrolmentRepo
 from app.requests.enrolment_requests import NewEnrolmentRequest
+from app.responses import FailureType, SuccessType
 from app.use_cases.create_new_enrolment import CreateNewEnrolment
 
 dummy_key = str(uuid4())
@@ -32,7 +33,7 @@ def test_create_new_enrolment_success():
     use_case = CreateNewEnrolment(enrolment_repo=repo)
     response = use_case.execute(request)
 
-    assert response.type == "Success"
+    assert response.type == SuccessType.SUCCESS
 
 
 def test_create_new_enrolment_failure():
@@ -48,4 +49,4 @@ def test_create_new_enrolment_failure():
     use_case = CreateNewEnrolment(enrolment_repo=repo)
     response = use_case.execute(request)
 
-    assert response.type == "ResourceError"
+    assert response.type == FailureType.RESOURCE_ERROR

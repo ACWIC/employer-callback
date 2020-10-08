@@ -18,16 +18,14 @@ class CreateNewCallback(BaseModel):
 
     def execute(self, request: CallbackRequest):
         try:
-            # TODO: validate enrolment_id
-            # TODO: validate key for enrolment_id
-            enrolment_object = self.enrolment_repo.get_enrolment(
+            enrolment_object_response = self.enrolment_repo.get_enrolment(
                 enrolment_id=request.enrolment_id
             )
-            if not enrolment_object:
-                return ResponseFailure.build_from_resource_error(
-                    message="'enrolment_id' doesn't exist!"
-                )
-            if enrolment_object.key != request.key:
+            # return failed response if enrolment_id is invalid
+            if isinstance(enrolment_object_response, ResponseFailure):
+                return enrolment_object_response
+            # If request isn't failed, then an Enrolment object is returned, check shared_secret
+            if enrolment_object_response.key != request.key:
                 return ResponseFailure.build_from_resource_error(
                     message="'shared_secret' key doesn't match"
                 )

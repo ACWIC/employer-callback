@@ -12,7 +12,7 @@ from app.domain.entities.enrolment import Enrolment
 from app.repositories.callback_repo import CallbackRepo
 from app.repositories.enrolment_repo import EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
-from app.responses import FailureType, SuccessType
+from app.responses import FailureType, ResponseFailure, SuccessType
 from app.use_cases.create_new_callback import CreateNewCallback
 
 
@@ -100,7 +100,13 @@ def test_create_new_callback_failure_on_invalid_enrolment_id(patched_uuid4):
     key = patched_uuid4()
     tp_ref = 534
     pl = {}
-    enrolment_repo.get_enrolment.return_value = None
+    error_message = (
+        "NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: "
+        "The specified key does not exist."
+    )
+    enrolment_repo.get_enrolment.return_value = (
+        ResponseFailure.build_from_resource_error(message=error_message)
+    )
 
     request = CallbackRequest(  # Send invalid enrolment ID
         enrolment_id=invalid_enrl_id,
@@ -113,7 +119,7 @@ def test_create_new_callback_failure_on_invalid_enrolment_id(patched_uuid4):
 
     repo.save_callback.assert_not_called()
     assert response.type == FailureType.RESOURCE_ERROR
-    assert response.message == "'enrolment_id' doesn't exist!"
+    assert response.message == error_message
 
 
 @patch("uuid.uuid4")
