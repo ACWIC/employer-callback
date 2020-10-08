@@ -1,15 +1,15 @@
 from fastapi import APIRouter
-from app.requests.callback_requests import CallbackRequest
-from app.repositories.s3_callback_repo import S3CallbackRepo
-from app.use_cases.create_new_callback import CreateNewCallback
 
+from app.repositories.s3_callback_repo import S3CallbackRepo
+from app.requests.callback_requests import CallbackRequest
+from app.use_cases.create_new_callback import CreateNewCallback
 
 router = APIRouter()
 
 
 @router.post("/callbacks")
 def create_callback(inputs: CallbackRequest):
-    ''' Message from Training Provider to Employer.
+    """Message from Training Provider to Employer.
 
     Contains information about the delivery of training services,
     is linked to student identity and employer context by enrolment_id.
@@ -52,7 +52,7 @@ def create_callback(inputs: CallbackRequest):
       enrolment_id, payload and tp_sequence match.
       The service will always return the same values
       for recipient-assigned fields (callback_id, received).
-    '''
+    """
     callback_repo = S3CallbackRepo()
     use_case = CreateNewCallback(callback_repo=callback_repo)
     response = use_case.execute(inputs)

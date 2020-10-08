@@ -7,16 +7,13 @@ def test_new_callback_request():
     the resulting object should have correct attribute values.
     """
     # dummy data
-    key = 'employer_made_this'
-    e_id = 'employer_made_this'
+    key = "employer_made_this"
+    e_id = "employer_made_this"
     tp_seq = 76543567
     pl = {"days": "hapy"}
 
     request = CallbackRequest(
-        enrolment_id=e_id,
-        key=key,
-        tp_sequence=tp_seq,
-        payload=pl
+        enrolment_id=e_id, key=key, tp_sequence=tp_seq, payload=pl
     )
 
     assert request.enrolment_id == e_id

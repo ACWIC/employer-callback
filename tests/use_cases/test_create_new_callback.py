@@ -1,10 +1,11 @@
 """
 These tests evaluate (and document) the business logic.
 """
-from datetime import datetime
 import random
-from uuid import uuid4
+from datetime import datetime
 from unittest import mock
+from uuid import uuid4
+
 from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
 from app.requests.callback_requests import CallbackRequest
@@ -20,8 +21,8 @@ def test_create_new_callback_success():
     repo = mock.Mock(spec=CallbackRepo)
     # dummy data
     cb_id = uuid4()
-    enrl_id = 'dummy_enrolment_id'
-    key = 'dummy_enrolment_key'
+    enrl_id = "dummy_enrolment_id"
+    key = "dummy_enrolment_key"
     tp_ref = random.randint(0, 99999)
     rx = datetime.now()
     pl = {"data": "blbnjsd;fnbs"}
@@ -31,20 +32,17 @@ def test_create_new_callback_success():
         key=key,
         tp_sequence=tp_ref,
         received=rx,
-        payload=pl
+        payload=pl,
     )
     repo.save_callback.return_value = callback
 
     request = CallbackRequest(
-        enrolment_id=enrl_id,
-        key=key,
-        tp_sequence=tp_ref,
-        payload=pl
+        enrolment_id=enrl_id, key=key, tp_sequence=tp_ref, payload=pl
     )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)
 
-    assert response.type == 'Success'
+    assert response.type == "Success"
 
 
 def test_create_new_callback_failure():
@@ -54,19 +52,16 @@ def test_create_new_callback_failure():
     the response type should be "ResourceError".
     """
     repo = mock.Mock(spec=CallbackRepo)
-    enrl_id = 'dummy_enrolment_id'
-    key = 'dummy_enrolment_key'
+    enrl_id = "dummy_enrolment_id"
+    key = "dummy_enrolment_key"
     tp_ref = 534
     pl = {"brace": "yourself"}
     repo.save_callback.side_effect = Exception()
 
     request = CallbackRequest(
-        enrolment_id=enrl_id,
-        key=key,
-        tp_sequence=tp_ref,
-        payload=pl
+        enrolment_id=enrl_id, key=key, tp_sequence=tp_ref, payload=pl
     )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)
 
-    assert response.type == 'ResourceError'
+    assert response.type == "ResourceError"

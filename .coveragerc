@@ -1,0 +1,9 @@
+[run]
+include = app/*
+branch = True
+
+[html]
+directory = test-reports/cov/
+
+[xml]
+output = test-reports/coverage.xml
