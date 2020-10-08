@@ -1,22 +1,11 @@
-from app.requests.callback_requests import CallbackRequest
+from app.requests.enrolment_requests import NewEnrolmentRequest
 
 
-def test_new_callback_request():
+def test_new_enrolment_request():
     """
-    When a NewCallbackRequest is instantiated,
+    When a NewEnrollmentRequest is instantiated,
     the resulting object should have correct attribute values.
     """
-    # dummy data
-    key = "employer_made_this"
-    e_id = "employer_made_this"
-    tp_seq = 76543567
-    pl = {"days": "hapy"}
+    request = NewEnrolmentRequest(enrolment_id="some-enrolment-id")
 
-    request = CallbackRequest(
-        enrolment_id=e_id, key=key, tp_sequence=tp_seq, payload=pl
-    )
-
-    assert request.enrolment_id == e_id
-    assert request.key == key
-    assert request.tp_sequence == tp_seq
-    assert request.payload == pl
+    assert request.enrolment_id == "some-enrolment-id"
