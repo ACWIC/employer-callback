@@ -8,4 +8,4 @@ class CallbackRepo(abc.ABC):
     def save_callback(
         self, enrolment_id: str, key: str, tp_sequence: int, payload: dict
     ) -> Callback:
-        pass
+        """"""

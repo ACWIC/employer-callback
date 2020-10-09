@@ -11,6 +11,7 @@ class FailureType(str, Enum):
     RESOURCE_ERROR = 404
     SYSTEM_ERROR = 500
     PARAMETER_ERROR = 400
+    VALIDATION_ERROR = 422
 
 
 class ResponseFailure(BaseModel):
