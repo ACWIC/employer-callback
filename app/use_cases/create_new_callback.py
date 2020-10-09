@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from app.repositories.callback_repo import CallbackRepo
-from app.repositories.enrolment_repo import EnrolmentRepo
+from app.repositories.s3_enrolment_repo import EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
 from app.responses import ResponseFailure, ResponseSuccess
 
@@ -25,7 +25,7 @@ class CreateNewCallback(BaseModel):
             if isinstance(enrolment_object_response, ResponseFailure):
                 return enrolment_object_response
             # If request isn't failed, then an Enrolment object is returned, check shared_secret
-            if enrolment_object_response.key != request.key:
+            if enrolment_object_response.shared_secret != request.key:
                 return ResponseFailure.build_from_resource_error(
                     message="'shared_secret' key doesn't match"
                 )

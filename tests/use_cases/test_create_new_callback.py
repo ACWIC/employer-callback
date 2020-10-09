@@ -11,6 +11,7 @@ from app.domain.entities.callback import Callback
 from app.domain.entities.enrolment import Enrolment
 from app.repositories.callback_repo import CallbackRepo
 from app.repositories.enrolment_repo import EnrolmentRepo
+from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
 from app.responses import FailureType, ResponseFailure, SuccessType
 from app.use_cases.create_new_callback import CreateNewCallback
@@ -28,6 +29,7 @@ def test_create_new_callback_success():
     cb_id = uuid4()
     enrl_id = "dummy_enrolment_id"
     key = "dummy_enrolment_key"
+    dummy_ref = "dummy_ref"
     tp_ref = random.randint(0, 99999)
     rx = datetime.now()
     pl = {"data": "blbnjsd;fnbs"}
@@ -42,7 +44,8 @@ def test_create_new_callback_success():
     enrolment = Enrolment(
         created=datetime.now(),
         enrolment_id=enrl_id,
-        key=key,
+        shared_secret=key,
+        internal_reference=dummy_ref,
     )
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.return_value = callback
@@ -55,7 +58,7 @@ def test_create_new_callback_success():
 
     assert response.type == SuccessType.SUCCESS
     assert response.value.get("enrolment_id") == enrolment.enrolment_id
-    assert response.value.get("key") == enrolment.key
+    assert response.value.get("key") == enrolment.shared_secret
 
 
 def test_create_new_callback_failure():
@@ -65,15 +68,17 @@ def test_create_new_callback_failure():
     the response type should be "ResourceError".
     """
     repo = mock.Mock(spec=CallbackRepo)
-    enrolment_repo = mock.Mock(spec=EnrolmentRepo)
+    enrolment_repo = mock.Mock(spec=S3EnrolmentRepo)
     enrl_id = "dummy_enrolment_id"
     key = "dummy_enrolment_key"
+    dummy_ref = "dummy_ref"
     tp_ref = 534
     pl = {"brace": "yourself"}
     enrolment = Enrolment(
         created=datetime.now(),
         enrolment_id=enrl_id,
-        key=key,
+        shared_secret=key,
+        internal_reference=dummy_ref,
     )
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.side_effect = Exception()
@@ -128,6 +133,7 @@ def test_create_new_callback_failure_on_invalid_shared_secret(patched_uuid4):
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
     enrl_id = "75228a95-6bb6-4693-9673-dbd06b63ec7e"
     key = "c8894b4f-c160-40fa-8b2b-22a00ee49944"
+    dummy_ref = "c8894b4f-c160-40fa-8b2b-22a00ee49945"
     invalid_key = "9a778aac-09b0-48f3-bc5b-6710a60b8c6f"
     patched_uuid4.side_effect = [
         str(UUID(enrl_id)),
@@ -143,7 +149,8 @@ def test_create_new_callback_failure_on_invalid_shared_secret(patched_uuid4):
     enrolment = Enrolment(
         created=datetime.now(),
         enrolment_id=enrl_id,
-        key=key,
+        shared_secret=key,
+        internal_reference=dummy_ref,
     )
     enrolment_repo.get_enrolment.return_value = enrolment
 

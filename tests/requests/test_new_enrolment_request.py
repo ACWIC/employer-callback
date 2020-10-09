@@ -6,6 +6,7 @@ def test_new_enrolment_request():
     When a NewEnrollmentRequest is instantiated,
     the resulting object should have correct attribute values.
     """
-    request = NewEnrolmentRequest(enrolment_id="some-enrolment-id")
+    ref = "some-reference"
+    request = NewEnrolmentRequest(internal_reference=ref)
 
-    assert request.enrolment_id == "some-enrolment-id"
+    assert request.internal_reference == ref
