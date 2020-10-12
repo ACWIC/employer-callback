@@ -4,7 +4,6 @@ These tests evaluate (and document) the business logic.
 import random
 from datetime import datetime
 from unittest import mock
-from uuid import uuid4
 
 from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
@@ -20,16 +19,16 @@ def test_create_new_callback_success():
     """
     repo = mock.Mock(spec=CallbackRepo)
     # dummy data
-    cb_id = uuid4()
+    cb_id = "dummy_callback_id"
     enrl_id = "dummy_enrolment_id"
-    key = "dummy_enrolment_key"
+    shared_secret = "dummy_enrolment_key"
     tp_ref = random.randint(0, 99999)
     rx = datetime.now()
     pl = {"data": "blbnjsd;fnbs"}
     callback = Callback(
         callback_id=cb_id,
         enrolment_id=enrl_id,
-        key=key,
+        shared_secret=shared_secret,
         tp_sequence=tp_ref,
         received=rx,
         payload=pl,
@@ -37,7 +36,10 @@ def test_create_new_callback_success():
     repo.save_callback.return_value = callback
 
     request = CallbackRequest(
-        enrolment_id=enrl_id, key=key, tp_sequence=tp_ref, payload=pl
+        enrolment_id=enrl_id,
+        shared_secret=shared_secret,
+        tp_sequence=tp_ref,
+        payload=pl,
     )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)
@@ -53,13 +55,16 @@ def test_create_new_callback_failure():
     """
     repo = mock.Mock(spec=CallbackRepo)
     enrl_id = "dummy_enrolment_id"
-    key = "dummy_enrolment_key"
+    shared_secret = "dummy_enrolment_key"
     tp_ref = 534
     pl = {"brace": "yourself"}
     repo.save_callback.side_effect = Exception()
 
     request = CallbackRequest(
-        enrolment_id=enrl_id, key=key, tp_sequence=tp_ref, payload=pl
+        enrolment_id=enrl_id,
+        shared_secret=shared_secret,
+        tp_sequence=tp_ref,
+        payload=pl,
     )
     use_case = CreateNewCallback(callback_repo=repo)
     response = use_case.execute(request)
