@@ -1,30 +1,15 @@
 import json
-import os
 import uuid
 from datetime import datetime
 from typing import Any, Union
 
 import boto3
 
-from app.config import Config
+from app.config import settings
 from app.domain.entities.callback import Callback
 from app.domain.entities.enrolment import Enrolment
 from app.repositories.enrolment_repo import EnrolmentRepo
-from app.utils import Random
-
-connection_data = {
-    "aws_access_key_id": os.environ.get(
-        "S3_ACCESS_KEY_ID",
-    )
-    or None,
-    "aws_secret_access_key": os.environ.get(
-        "S3_SECRET_ACCESS_KEY",
-    )
-    or None,
-    "endpoint_url": os.environ.get(
-        "S3_ENDPOINT_URL", "https://s3.us-east-1.amazonaws.com"
-    ),
-}
+from app.utils.random import Random
 
 
 class S3EnrolmentRepo(EnrolmentRepo):
@@ -33,9 +18,9 @@ class S3EnrolmentRepo(EnrolmentRepo):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.params = {
-            "aws_access_key_id": Config.S3_ACCESS_KEY_ID,
-            "aws_secret_access_key": Config.S3_SECRET_ACCESS_KEY,
-            "endpoint_url": Config.S3_ENDPOINT_URL,
+            "aws_access_key_id": settings.S3_ACCESS_KEY_ID,
+            "aws_secret_access_key": settings.S3_SECRET_ACCESS_KEY,
+            "endpoint_url": settings.S3_ENDPOINT_URL,
         }
         self.s3 = boto3.client("s3", **self.params)
 
@@ -47,20 +32,20 @@ class S3EnrolmentRepo(EnrolmentRepo):
         self.s3.put_object(
             Body=bytes(enrl.enrolment_id, "utf-8"),
             Key=f"employer_reference/{ref_hash}/enrolment_id.json",
-            Bucket=Config.ENROLMENT_BUCKET,
+            Bucket=settings.ENROLMENT_BUCKET,
         )
 
         self.s3.put_object(
             Body=bytes(enrl.shared_secret, "utf-8"),
             Key=f"enrolments/{enrl.enrolment_id}.json",
-            Bucket=Config.ENROLMENT_BUCKET,
+            Bucket=settings.ENROLMENT_BUCKET,
         )
 
         return enrl
 
     def get_enrolment(self, enrolment_id: str):
         obj = self.s3.get_object(
-            Key=f"{enrolment_id}.json", Bucket=os.environ["ENROLMENT_BUCKET"]
+            Key=f"{enrolment_id}.json", Bucket=settings.ENROLMENT_BUCKET
         )
         enrl = Enrolment(**json.loads(obj["Body"].read().decode()))
         return enrl
@@ -68,11 +53,9 @@ class S3EnrolmentRepo(EnrolmentRepo):
     def get_callbacks_list(self, enrolment_id: str):
         callbacks_list = []
         for row in self.s3.list_objects(
-            Bucket=os.environ["CALLBACK_BUCKET"], Prefix="{}/".format(enrolment_id)
+            Bucket=settings.CALLBACK_BUCKET, Prefix="{}/".format(enrolment_id)
         )["Contents"]:
-            obj = self.s3.get_object(
-                Key=row["Key"], Bucket=os.environ["CALLBACK_BUCKET"]
-            )
+            obj = self.s3.get_object(Key=row["Key"], Bucket=settings.CALLBACK_BUCKET)
             cb = Callback(**json.loads(obj["Body"].read().decode()))
             if cb.enrolment_id == enrolment_id:
                 callbacks_list.append(
@@ -96,7 +79,7 @@ class S3EnrolmentRepo(EnrolmentRepo):
         self.s3.put_object(
             Body=bytes(cb.json(), "utf-8"),
             Key=f"{cb.enrolment_id}/{cb.callback_id}.json",
-            Bucket=os.environ["CALLBACK_BUCKET"],
+            Bucket=settings.CALLBACK_BUCKET,
         )
         return cb
 
@@ -109,7 +92,7 @@ class S3EnrolmentRepo(EnrolmentRepo):
         try:
             self.s3.get_object(
                 Key=f"employer_reference/{ref_hash}/enrolment_id.json",
-                Bucket=Config.ENROLMENT_BUCKET,
+                Bucket=settings.ENROLMENT_BUCKET,
             )
         except Exception:
             return True

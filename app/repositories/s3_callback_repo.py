@@ -1,26 +1,12 @@
-import os
 import uuid
 from datetime import datetime
 from typing import Any
 
 import boto3
 
+from app.config import settings
 from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
-
-connection_data = {
-    "aws_access_key_id": os.environ.get(
-        "S3_ACCESS_KEY_ID",
-    )
-    or None,
-    "aws_secret_access_key": os.environ.get(
-        "S3_SECRET_ACCESS_KEY",
-    )
-    or None,
-    "endpoint_url": os.environ.get(
-        "S3_ENDPOINT_URL", "https://s3.us-east-1.amazonaws.com"
-    ),
-}
 
 
 class S3CallbackRepo(CallbackRepo):
@@ -28,7 +14,12 @@ class S3CallbackRepo(CallbackRepo):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.s3 = boto3.client("s3", **connection_data)
+        self.params = {
+            "aws_access_key_id": settings.S3_ACCESS_KEY_ID,
+            "aws_secret_access_key": settings.S3_SECRET_ACCESS_KEY,
+            "endpoint_url": settings.S3_ENDPOINT_URL,
+        }
+        self.s3 = boto3.client("s3", **self.params)
 
     def save_callback(
         self, enrolment_id: str, key: str, tp_sequence: int, payload: dict
@@ -46,7 +37,7 @@ class S3CallbackRepo(CallbackRepo):
         self.s3.put_object(
             Body=bytes(cb.json(), "utf-8"),
             Key=f"{cb.enrolment_id}/{cb.callback_id}.json",
-            Bucket=os.environ["CALLBACK_BUCKET"],
+            Bucket=settings.CALLBACK_BUCKET,
         )
 
         return cb
