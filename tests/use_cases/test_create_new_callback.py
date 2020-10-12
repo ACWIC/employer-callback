@@ -37,7 +37,7 @@ def test_create_new_callback_success():
     callback = Callback(
         callback_id=dummy_callback_id,
         enrolment_id=dummy_enrolment_id,
-        key=dummy_shared_secret,
+        shared_secret=dummy_shared_secret,
         tp_sequence=dummy_tp_ref,
         received=dummy_received,
         payload=dummy_payload,
@@ -53,7 +53,7 @@ def test_create_new_callback_success():
 
     request = CallbackRequest(
         enrolment_id=dummy_enrolment_id,
-        key=dummy_shared_secret,
+        shared_secret=dummy_shared_secret,
         tp_sequence=dummy_tp_ref,
         payload=dummy_payload,
     )
@@ -62,7 +62,7 @@ def test_create_new_callback_success():
 
     assert response.type == SuccessType.SUCCESS
     assert response.value.get("enrolment_id") == enrolment.enrolment_id
-    assert response.value.get("key") == enrolment.shared_secret
+    assert response.value.get("shared_secret") == enrolment.shared_secret
 
 
 def test_create_new_callback_failure():
@@ -84,7 +84,7 @@ def test_create_new_callback_failure():
 
     request = CallbackRequest(
         enrolment_id=dummy_enrolment_id,
-        key=dummy_shared_secret,
+        shared_secret=dummy_shared_secret,
         tp_sequence=dummy_tp_ref,
         payload=dummy_payload,
     )
@@ -109,7 +109,7 @@ def test_create_new_callback_failure_on_invalid_enrolment_id():
 
     request = CallbackRequest(  # Send invalid enrolment ID
         enrolment_id=dummy_invalid_enrolment_id,
-        key=dummy_shared_secret,
+        shared_secret=dummy_shared_secret,
         tp_sequence=dummy_tp_ref,
         payload=dummy_payload,
     )
@@ -135,7 +135,7 @@ def test_create_new_callback_failure_on_invalid_shared_secret():
 
     request = CallbackRequest(  # Send invalid key which doesn't match
         enrolment_id=dummy_enrolment_id,
-        key=dummy_invalid_shared_secret,
+        shared_secret=dummy_invalid_shared_secret,
         tp_sequence=dummy_tp_ref,
         payload=dummy_payload,
     )

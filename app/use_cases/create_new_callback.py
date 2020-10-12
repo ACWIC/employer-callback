@@ -31,7 +31,7 @@ class CreateNewCallback(BaseModel):
             if isinstance(enrolment_object_response, ResponseFailure):
                 return enrolment_object_response
             # If request isn't failed, then an Enrolment object is returned, check shared_secret
-            if enrolment_object_response.shared_secret != request.key:
+            if enrolment_object_response.shared_secret != request.shared_secret:
                 return ResponseFailure.build_from_resource_error(
                     message="'shared_secret' key doesn't match"
                 )
