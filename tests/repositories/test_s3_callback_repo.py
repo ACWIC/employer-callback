@@ -5,10 +5,10 @@ The are testing the encapsulation of the "impure" code
 the repos should return pure domain objects
 of the appropriate type.
 """
-from os import environ
 from unittest.mock import patch
 from uuid import UUID
 
+from app.config import settings
 from app.repositories.s3_callback_repo import S3CallbackRepo
 
 
@@ -35,7 +35,6 @@ def test_save_callback(boto_client, uuid4):
     tp_seq = 9876543
     pl = {"say": "what?"}
     repo = S3CallbackRepo()
-    environ["CALLBACK_BUCKET"] = "some-bucket"
     callback = repo.save_callback(
         enrolment_id=e_id, key=k, tp_sequence=tp_seq, payload=pl
     )
@@ -47,5 +46,5 @@ def test_save_callback(boto_client, uuid4):
     boto_client.return_value.put_object.assert_called_once_with(
         Body=bytes(callback.json(), "utf-8"),
         Key=f"{callback.enrolment_id}/{callback.callback_id}.json",  # NOQA
-        Bucket="some-bucket",
+        Bucket=settings.CALLBACK_BUCKET,
     )
