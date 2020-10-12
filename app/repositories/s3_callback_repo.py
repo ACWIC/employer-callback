@@ -1,6 +1,4 @@
 import json
-import uuid
-from datetime import datetime
 from typing import Any
 
 import boto3
@@ -22,22 +20,12 @@ class S3CallbackRepo(CallbackRepo):
         }
         self.s3 = boto3.client("s3", **self.params)
 
-    def save_callback(
-        self, enrolment_id: str, key: str, tp_sequence: int, payload: dict
-    ) -> Callback:
-
-        cb = Callback(
-            callback_id=str(uuid.uuid4()),
-            enrolment_id=enrolment_id,
-            key=key,
-            received=datetime.now(),
-            tp_sequence=tp_sequence,
-            payload=payload,
-        )
+    def save_callback(self, callback: dict) -> Callback:
+        cb = Callback(**callback)
 
         self.s3.put_object(
             Body=bytes(cb.json(), "utf-8"),
-            Key=f"{cb.enrolment_id}/{cb.callback_id}.json",
+            Key=f"callbacks/{cb.enrolment_id}/{cb.callback_id}.json",
             Bucket=settings.CALLBACK_BUCKET,
         )
 

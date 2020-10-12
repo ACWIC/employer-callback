@@ -17,6 +17,12 @@ class CreateNewCallback(BaseModel):
         arbitrary_types_allowed = True
 
     def execute(self, request: CallbackRequest):
+        params = {
+            "enrolment_id": request.enrolment_id,
+            "shared_secret": request.shared_secret,
+            "tp_sequence": request.tp_sequence,
+            "payload": request.payload,
+        }
         try:
             enrolment_object_response = self.enrolment_repo.get_enrolment(
                 enrolment_id=request.enrolment_id
@@ -30,12 +36,7 @@ class CreateNewCallback(BaseModel):
                     message="'shared_secret' key doesn't match"
                 )
 
-            callback = self.callback_repo.save_callback(
-                enrolment_id=request.enrolment_id,
-                key=request.key,
-                tp_sequence=request.tp_sequence,
-                payload=request.payload,
-            )
+            callback = self.callback_repo.save_callback(params)
         except Exception as e:  # noqa - TODO: handle specific failure types
             return ResponseFailure.build_from_resource_error(message=e)
 
