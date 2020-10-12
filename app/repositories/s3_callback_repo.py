@@ -1,3 +1,4 @@
+import json
 import uuid
 from datetime import datetime
 from typing import Any
@@ -26,7 +27,7 @@ class S3CallbackRepo(CallbackRepo):
     ) -> Callback:
 
         cb = Callback(
-            callback_id=uuid.uuid4(),
+            callback_id=str(uuid.uuid4()),
             enrolment_id=enrolment_id,
             key=key,
             received=datetime.now(),
@@ -41,3 +42,33 @@ class S3CallbackRepo(CallbackRepo):
         )
 
         return cb
+
+    def get_callbacks_list(self, enrolment_id: str):
+        print(
+            "get_callbacks_list() enrolment_id, BUCKET",
+            enrolment_id,
+            settings.CALLBACK_BUCKET,
+        )
+        from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
+
+        enrolment_repo = S3EnrolmentRepo()
+        # check if enrolment exists, it will raise error if it doesn't
+        enrolment_repo.get_enrolment(enrolment_id)
+        # get callbacks for enrolment id
+        callbacks_objects_list = self.s3.list_objects(
+            Bucket=settings.CALLBACK_BUCKET, Prefix="{}/".format(enrolment_id)
+        )
+        # print("callbacks_objects_list", callbacks_objects_list)
+        callbacks_list = []
+        # If there have been 0 callbacks, the list should be empty.
+        if "Contents" not in callbacks_objects_list:
+            return {"callbacks_list": callbacks_list}
+        # add callback_id and datetime in list
+        for row in callbacks_objects_list["Contents"]:
+            obj = self.s3.get_object(Key=row["Key"], Bucket=settings.CALLBACK_BUCKET)
+            callback = Callback(**json.loads(obj["Body"].read().decode()))
+            callbacks_list.append(
+                {"callback_id": callback.callback_id, "received": callback.received}
+            )
+        # print("callbacks_list:", [callbacks_list])
+        return {"callbacks_list": callbacks_list}

@@ -1,15 +1,15 @@
 import json
-import uuid
-from datetime import datetime
 from typing import Any, Union
 
 import boto3
 
 from app.config import settings
-from app.domain.entities.callback import Callback
 from app.domain.entities.enrolment import Enrolment
 from app.repositories.enrolment_repo import EnrolmentRepo
+from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.utils.random import Random
+
+callback_repo = S3CallbackRepo()
 
 
 class S3EnrolmentRepo(EnrolmentRepo):
@@ -36,52 +36,13 @@ class S3EnrolmentRepo(EnrolmentRepo):
         )
 
         self.s3.put_object(
-            Body=bytes(enrl.shared_secret, "utf-8"),
+            Body=bytes(enrl.json(), "utf-8"),
+            # Body=bytes(enrl.shared_secret, "utf-8"),
             Key=f"enrolments/{enrl.enrolment_id}.json",
             Bucket=settings.ENROLMENT_BUCKET,
         )
 
         return enrl
-
-    def get_enrolment(self, enrolment_id: str):
-        obj = self.s3.get_object(
-            Key=f"{enrolment_id}.json", Bucket=settings.ENROLMENT_BUCKET
-        )
-        enrl = Enrolment(**json.loads(obj["Body"].read().decode()))
-        return enrl
-
-    def get_callbacks_list(self, enrolment_id: str):
-        callbacks_list = []
-        for row in self.s3.list_objects(
-            Bucket=settings.CALLBACK_BUCKET, Prefix="{}/".format(enrolment_id)
-        )["Contents"]:
-            obj = self.s3.get_object(Key=row["Key"], Bucket=settings.CALLBACK_BUCKET)
-            cb = Callback(**json.loads(obj["Body"].read().decode()))
-            if cb.enrolment_id == enrolment_id:
-                callbacks_list.append(
-                    {"callback_id": cb.callback_id, "received": cb.received}
-                )
-        print("callbacks_list:", [callbacks_list])
-        return {"callbacks_list": callbacks_list}
-
-    # Temp: For testing purpose
-    def save_callback(
-        self, enrolment_id: str, key: str, tp_sequence: int, payload: dict
-    ):
-        cb = Callback(
-            callback_id=str(uuid.uuid4()),
-            enrolment_id=enrolment_id,
-            key=str(uuid.uuid4()),
-            received=datetime.now(),
-            tp_sequence=tp_sequence,
-            payload=payload,
-        )
-        self.s3.put_object(
-            Body=bytes(cb.json(), "utf-8"),
-            Key=f"{cb.enrolment_id}/{cb.callback_id}.json",
-            Bucket=settings.CALLBACK_BUCKET,
-        )
-        return cb
 
     def is_reference_unique(
         self, ref_hash: str
@@ -98,3 +59,30 @@ class S3EnrolmentRepo(EnrolmentRepo):
             return True
         else:
             return False
+
+    def get_enrolment(self, enrolment_id: str):
+        print(
+            "get_enrolment() enrolment_id, BUCKET",
+            enrolment_id,
+            settings.ENROLMENT_BUCKET,
+        )
+        obj = self.s3.get_object(
+            Key=f"enrolments/{enrolment_id}.json", Bucket=settings.ENROLMENT_BUCKET
+        )
+        enrolment = Enrolment(**json.loads(obj["Body"].read().decode()))
+        return enrolment
+
+    def get_enrolment_status(self, enrolment_id: str):
+        callbacks_list = callback_repo.get_callbacks_list(enrolment_id)
+        total_callbacks = len(callbacks_list["callbacks_list"])
+        most_recent_callback = ""
+        for row in callbacks_list["callbacks_list"]:
+            most_recent_callback = row["received"]
+
+        enrolment = {
+            "status": {
+                "total_callbacks": str(total_callbacks),
+                "most_recent_callback": str(most_recent_callback),
+            }
+        }
+        return enrolment

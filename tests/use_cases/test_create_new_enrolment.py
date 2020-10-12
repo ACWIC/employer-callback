@@ -48,9 +48,10 @@ def test_create_new_enrolment_failure():
     the response type should be "ResourceError".
     """
     repo = mock.Mock(spec=S3EnrolmentRepo)
+    repo.is_reference_unique.return_value = True
 
     repo.save_enrolment.side_effect = Exception()
-    request = NewEnrolmentRequest(internal_reference=dummy_enrolment)
+    request = NewEnrolmentRequest(internal_reference=dummy_internal_reference)
     use_case = CreateNewEnrolment(enrolment_repo=repo)
     response = use_case.execute(request)
 
