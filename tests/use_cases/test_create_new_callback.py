@@ -4,8 +4,7 @@ These tests evaluate (and document) the business logic.
 import random
 from datetime import datetime
 from unittest import mock
-from unittest.mock import patch
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from app.domain.entities.callback import Callback
 from app.domain.entities.enrolment import Enrolment
@@ -16,6 +15,16 @@ from app.requests.callback_requests import CallbackRequest
 from app.responses import FailureType, ResponseFailure, SuccessType
 from app.use_cases.create_new_callback import CreateNewCallback
 
+dummy_callback_id = str(uuid4())
+dummy_enrolment_id = str(uuid4())
+dummy_invalid_enrolment_id = str(uuid4())
+dummy_shared_secret = str(uuid4())
+dummy_invalid_shared_secret = str(uuid4())
+dummy_received = datetime.now()
+dummy_ref = "dummy_ref"
+dummy_tp_ref = random.randint(0, 99999)
+dummy_payload = {"data": "blbnjsd;fnbs"}
+
 
 def test_create_new_callback_success():
     """
@@ -25,33 +34,28 @@ def test_create_new_callback_success():
     """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
-    # dummy data
-    cb_id = uuid4()
-    enrl_id = "dummy_enrolment_id"
-    key = "dummy_enrolment_key"
-    dummy_ref = "dummy_ref"
-    tp_ref = random.randint(0, 99999)
-    rx = datetime.now()
-    pl = {"data": "blbnjsd;fnbs"}
     callback = Callback(
-        callback_id=cb_id,
-        enrolment_id=enrl_id,
-        key=key,
-        tp_sequence=tp_ref,
-        received=rx,
-        payload=pl,
+        callback_id=dummy_callback_id,
+        enrolment_id=dummy_enrolment_id,
+        key=dummy_shared_secret,
+        tp_sequence=dummy_tp_ref,
+        received=dummy_received,
+        payload=dummy_payload,
     )
     enrolment = Enrolment(
         created=datetime.now(),
-        enrolment_id=enrl_id,
-        shared_secret=key,
+        enrolment_id=dummy_enrolment_id,
+        shared_secret=dummy_shared_secret,
         internal_reference=dummy_ref,
     )
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.return_value = callback
 
     request = CallbackRequest(
-        enrolment_id=enrl_id, key=key, tp_sequence=tp_ref, payload=pl
+        enrolment_id=dummy_enrolment_id,
+        key=dummy_shared_secret,
+        tp_sequence=dummy_tp_ref,
+        payload=dummy_payload,
     )
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
@@ -69,22 +73,20 @@ def test_create_new_callback_failure():
     """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=S3EnrolmentRepo)
-    enrl_id = "dummy_enrolment_id"
-    key = "dummy_enrolment_key"
-    dummy_ref = "dummy_ref"
-    tp_ref = 534
-    pl = {"brace": "yourself"}
     enrolment = Enrolment(
         created=datetime.now(),
-        enrolment_id=enrl_id,
-        shared_secret=key,
+        enrolment_id=dummy_enrolment_id,
+        shared_secret=dummy_shared_secret,
         internal_reference=dummy_ref,
     )
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.side_effect = Exception()
 
     request = CallbackRequest(
-        enrolment_id=enrl_id, key=key, tp_sequence=tp_ref, payload=pl
+        enrolment_id=dummy_enrolment_id,
+        key=dummy_shared_secret,
+        tp_sequence=dummy_tp_ref,
+        payload=dummy_payload,
     )
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
@@ -93,18 +95,10 @@ def test_create_new_callback_failure():
     assert response.type == FailureType.RESOURCE_ERROR
 
 
-@patch("uuid.uuid4")
-def test_create_new_callback_failure_on_invalid_enrolment_id(patched_uuid4):
+def test_create_new_callback_failure_on_invalid_enrolment_id():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
-    invalid_enrl_id = "9a778aac-09b0-48f3-bc5b-6710a60b8c6f"
-    key = "c8894b4f-c160-40fa-8b2b-22a00ee49944"
-    patched_uuid4.side_effect = [str(UUID(invalid_enrl_id)), str(UUID(key))]
 
-    invalid_enrl_id = patched_uuid4()
-    key = patched_uuid4()
-    tp_ref = 534
-    pl = {}
     error_message = (
         "NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: "
         "The specified key does not exist."
@@ -114,10 +108,10 @@ def test_create_new_callback_failure_on_invalid_enrolment_id(patched_uuid4):
     )
 
     request = CallbackRequest(  # Send invalid enrolment ID
-        enrolment_id=invalid_enrl_id,
-        key=key,
-        tp_sequence=tp_ref,
-        payload=pl,
+        enrolment_id=dummy_invalid_enrolment_id,
+        key=dummy_shared_secret,
+        tp_sequence=dummy_tp_ref,
+        payload=dummy_payload,
     )
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
@@ -127,38 +121,23 @@ def test_create_new_callback_failure_on_invalid_enrolment_id(patched_uuid4):
     assert response.message == error_message
 
 
-@patch("uuid.uuid4")
-def test_create_new_callback_failure_on_invalid_shared_secret(patched_uuid4):
+def test_create_new_callback_failure_on_invalid_shared_secret():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
-    enrl_id = "75228a95-6bb6-4693-9673-dbd06b63ec7e"
-    key = "c8894b4f-c160-40fa-8b2b-22a00ee49944"
-    dummy_ref = "c8894b4f-c160-40fa-8b2b-22a00ee49945"
-    invalid_key = "9a778aac-09b0-48f3-bc5b-6710a60b8c6f"
-    patched_uuid4.side_effect = [
-        str(UUID(enrl_id)),
-        str(UUID(key)),
-        str(UUID(invalid_key)),
-    ]
 
-    enrl_id = patched_uuid4()
-    key = patched_uuid4()
-    invalid_key = patched_uuid4()
-    tp_ref = 534
-    pl = {}
     enrolment = Enrolment(
         created=datetime.now(),
-        enrolment_id=enrl_id,
-        shared_secret=key,
+        enrolment_id=dummy_enrolment_id,
+        shared_secret=dummy_shared_secret,
         internal_reference=dummy_ref,
     )
     enrolment_repo.get_enrolment.return_value = enrolment
 
     request = CallbackRequest(  # Send invalid key which doesn't match
-        enrolment_id=enrl_id,
-        key=invalid_key,
-        tp_sequence=tp_ref,
-        payload=pl,
+        enrolment_id=dummy_enrolment_id,
+        key=dummy_invalid_shared_secret,
+        tp_sequence=dummy_tp_ref,
+        payload=dummy_payload,
     )
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
