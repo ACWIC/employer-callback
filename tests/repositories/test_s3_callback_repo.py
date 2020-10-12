@@ -41,7 +41,7 @@ def test_save_callback(boto_client, uuid4):
     )
 
     # TODO: assert enrollment is of the appropriate domain model type
-    assert callback.callback_id == callback_id
+    assert callback.callback_id == str(callback_id)
     assert str(callback_id) == "1dad3dd8-af28-4e61-ae23-4c93a456d10e"
 
     boto_client.return_value.put_object.assert_called_once_with(

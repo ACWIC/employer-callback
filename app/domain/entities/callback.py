@@ -1,11 +1,10 @@
 from datetime import datetime
-from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class Callback(BaseModel):
-    callback_id: UUID
+    callback_id: str
     received: datetime
     enrolment_id: str
     key: str

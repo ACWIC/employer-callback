@@ -1,5 +1,4 @@
 import datetime
-from uuid import uuid4
 
 import app.domain.entities.callback as cb
 
@@ -9,7 +8,7 @@ def test_callback_init():
     Ensure the callback data matches constructor values
     and the status is appropriately set.
     """
-    cb_id = uuid4()
+    cb_id = "this-is-callback-id"
     e_id = "this-is-my-enrolment-id"
     k = "this-is-my-key"
     tp_ref = 123456

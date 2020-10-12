@@ -4,7 +4,6 @@ These tests evaluate (and document) the business logic.
 import random
 from datetime import datetime
 from unittest import mock
-from uuid import uuid4
 
 from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
@@ -20,7 +19,7 @@ def test_create_new_callback_success():
     """
     repo = mock.Mock(spec=CallbackRepo)
     # dummy data
-    cb_id = uuid4()
+    cb_id = "dummy_callback_id"
     enrl_id = "dummy_enrolment_id"
     key = "dummy_enrolment_key"
     tp_ref = random.randint(0, 99999)

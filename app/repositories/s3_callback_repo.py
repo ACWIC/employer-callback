@@ -35,7 +35,7 @@ class S3CallbackRepo(CallbackRepo):
     ):
 
         cb = Callback(
-            callback_id=uuid.uuid4(),
+            callback_id=str(uuid.uuid4()),
             enrolment_id=enrolment_id,
             key=key,
             received=datetime.now(),
