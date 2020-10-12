@@ -5,6 +5,7 @@ from app.requests.callback_requests import CallbackRequest
 from app.use_cases.create_new_callback import CreateNewCallback
 
 router = APIRouter()
+callback_repo = S3CallbackRepo()
 
 
 @router.post("/callbacks")
@@ -53,7 +54,6 @@ def create_callback(inputs: CallbackRequest):
       The service will always return the same values
       for recipient-assigned fields (callback_id, received).
     """
-    callback_repo = S3CallbackRepo()
     use_case = CreateNewCallback(callback_repo=callback_repo)
     response = use_case.execute(inputs)
 

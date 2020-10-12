@@ -17,7 +17,7 @@ def test_callback_init():
     callback = cb.Callback(
         callback_id=cb_id,
         enrolment_id=e_id,
-        key=k,
+        shared_secret=k,
         tp_sequence=tp_ref,
         received=rx,
         payload=pl,
@@ -25,7 +25,7 @@ def test_callback_init():
 
     assert callback.callback_id == cb_id
     assert callback.enrolment_id == e_id
-    assert callback.key == k
+    assert callback.shared_secret == k
     assert callback.tp_sequence == tp_ref
     assert callback.received == rx
     assert callback.payload == pl
