@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException
 
 from app.repositories.s3_callback_repo import S3CallbackRepo
+from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
 from app.use_cases.create_new_callback import CreateNewCallback
 
 router = APIRouter()
 callback_repo = S3CallbackRepo()
+enrolment_repo = S3EnrolmentRepo()
 
 
 @router.post("/callbacks")
@@ -54,7 +56,9 @@ def create_callback(inputs: CallbackRequest):
       The service will always return the same values
       for recipient-assigned fields (callback_id, received).
     """
-    use_case = CreateNewCallback(callback_repo=callback_repo)
+    use_case = CreateNewCallback(
+        callback_repo=callback_repo, enrolment_repo=enrolment_repo
+    )
     response = use_case.execute(inputs)
     if bool(response) is False:  # If request failed
         raise HTTPException(
