@@ -57,6 +57,8 @@ def create_callback(inputs: CallbackRequest):
     use_case = CreateNewCallback(callback_repo=callback_repo)
     response = use_case.execute(inputs)
     if bool(response) is False:  # If request failed
-        raise HTTPException(status_code=response.type, detail=response.message)
+        raise HTTPException(
+            status_code=int(response.type.value), detail=response.message
+        )
 
     return response

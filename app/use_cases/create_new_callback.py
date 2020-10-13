@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 from app.repositories.callback_repo import CallbackRepo
 from app.repositories.s3_enrolment_repo import EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
 from app.responses import ResponseFailure, ResponseSuccess
+from app.utils import Random
 
 
 class CreateNewCallback(BaseModel):
@@ -18,10 +21,12 @@ class CreateNewCallback(BaseModel):
 
     def execute(self, request: CallbackRequest):
         params = {
+            "callback_id": Random.get_uuid(),
             "enrolment_id": request.enrolment_id,
             "shared_secret": request.shared_secret,
             "tp_sequence": request.tp_sequence,
             "payload": request.payload,
+            "received": datetime.now(),
         }
         try:
             enrolment_object_response = self.enrolment_repo.get_enrolment(
