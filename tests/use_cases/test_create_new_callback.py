@@ -144,5 +144,5 @@ def test_create_new_callback_failure_on_invalid_shared_secret():
     response = use_case.execute(request)
 
     repo.save_callback.assert_not_called()
-    assert response.type == FailureType.RESOURCE_ERROR
+    assert response.type == FailureType.UNAUTHORISED_ERROR
     assert response.message == "'shared_secret' key doesn't match"
