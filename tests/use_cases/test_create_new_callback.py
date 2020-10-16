@@ -61,6 +61,7 @@ def test_create_new_callback_success():
     response = use_case.execute(request)
 
     assert response.type == SuccessType.SUCCESS
+    assert response.message == "The callback has been saved."
     assert response.value.get("enrolment_id") == enrolment.enrolment_id
     assert response.value.get("shared_secret") == enrolment.shared_secret
 

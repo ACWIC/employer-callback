@@ -47,6 +47,7 @@ class ResponseFailure(BaseModel):
 class ResponseSuccess(BaseModel):
     value: dict
     type = SuccessType.SUCCESS
+    message: str = "Success"
 
     def __bool__(self):
         return True

@@ -42,7 +42,8 @@ class CreateNewCallback(BaseModel):
                 )
 
             callback = self.callback_repo.save_callback(params)
+            message = "The callback has been saved."
         except Exception as e:  # noqa - TODO: handle specific failure types
             return ResponseFailure.build_from_resource_error(message=e)
 
-        return ResponseSuccess(value=callback)
+        return ResponseSuccess(value=callback, message=message)
