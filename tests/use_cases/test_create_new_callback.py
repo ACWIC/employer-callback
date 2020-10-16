@@ -61,6 +61,7 @@ def test_create_new_callback_success():
     response = use_case.execute(request)
 
     assert response.type == SuccessType.SUCCESS
+    assert response.message == "The callback has been saved."
     assert response.value.get("enrolment_id") == enrolment.enrolment_id
     assert response.value.get("shared_secret") == enrolment.shared_secret
 
@@ -143,5 +144,5 @@ def test_create_new_callback_failure_on_invalid_shared_secret():
     response = use_case.execute(request)
 
     repo.save_callback.assert_not_called()
-    assert response.type == FailureType.RESOURCE_ERROR
+    assert response.type == FailureType.UNAUTHORISED_ERROR
     assert response.message == "'shared_secret' key doesn't match"

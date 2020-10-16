@@ -8,10 +8,11 @@ class SuccessType(str, Enum):
 
 
 class FailureType(str, Enum):
-    RESOURCE_ERROR = 404
-    SYSTEM_ERROR = 500
     PARAMETER_ERROR = 400
+    UNAUTHORISED_ERROR = 401
+    RESOURCE_ERROR = 404
     VALIDATION_ERROR = 422
+    SYSTEM_ERROR = 500
 
 
 class ResponseFailure(BaseModel):
@@ -43,10 +44,17 @@ class ResponseFailure(BaseModel):
             type=FailureType.VALIDATION_ERROR, message=cls._format_message(message)
         )
 
+    @classmethod
+    def build_from_unauthorised_error(cls, message=None):
+        return cls(
+            type=FailureType.UNAUTHORISED_ERROR, message=cls._format_message(message)
+        )
+
 
 class ResponseSuccess(BaseModel):
     value: dict
     type = SuccessType.SUCCESS
+    message: str = "Success"
 
     def __bool__(self):
         return True
