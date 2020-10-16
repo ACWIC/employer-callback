@@ -3,11 +3,11 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class SuccessType(str, Enum):
+class SuccessType(int, Enum):
     SUCCESS = 200
 
 
-class FailureType(str, Enum):
+class FailureType(int, Enum):
     PARAMETER_ERROR = 400
     UNAUTHORISED_ERROR = 401
     RESOURCE_ERROR = 404
