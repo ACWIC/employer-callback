@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.callbacks import router as v1_router
+from app.api.enrolments import router as v1_enrolment_router
 
 API_GATEWAY_STAGE_PREFIX = os.environ.get("STAGE_PREFIX", default="")
 API_GATEWAY_SERVICE_PREFIX = os.environ.get("SERVICE_PREFIX", default="")
@@ -24,7 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(v1_router, prefix=API_GATEWAY_SERVICE_PREFIX)
-
+app.include_router(v1_enrolment_router, prefix=API_GATEWAY_SERVICE_PREFIX)
 
 if __name__ == "__main__":
     # TODO: could be moved into a separate docs-specific entrypoint as

@@ -1,4 +1,4 @@
 fastapi==0.61.1
-pydantic==1.6.1
+pydantic[dotenv]==1.6.1
 boto3==1.15.1
 boto3-stubs[essential]==1.15.1.0
