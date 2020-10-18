@@ -15,6 +15,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+libs/
 lib64/
 parts/
 sdist/
@@ -125,9 +126,17 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# emacs
+*~
+\#*\#
+
+# MAC OSX
+.DS_store
+
 # Pyre type checker
 .pyre/
 
 .idea
 
 node_modules
+test-reports
