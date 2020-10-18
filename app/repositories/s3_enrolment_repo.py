@@ -17,12 +17,7 @@ class S3EnrolmentRepo(EnrolmentRepo):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.params = {
-            "aws_access_key_id": settings.S3_ACCESS_KEY_ID,
-            "aws_secret_access_key": settings.S3_SECRET_ACCESS_KEY,
-            "endpoint_url": settings.S3_ENDPOINT_URL,
-        }
-        self.s3 = boto3.client("s3", **self.params)
+        self.s3 = boto3.client("s3", **settings.s3_configuration)
 
     def save_enrolment(self, enrollment: dict):
 
