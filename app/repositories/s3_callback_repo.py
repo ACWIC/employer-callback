@@ -21,13 +21,15 @@ class S3CallbackRepo(CallbackRepo):
         self.s3 = boto3.client("s3", **self.params)
 
     def save_callback(self, callback: dict) -> Callback:
-        cb = Callback(**callback)
-
-        self.s3.put_object(
-            Body=bytes(cb.json(), "utf-8"),
-            Key=f"callbacks/{cb.enrolment_id}/{cb.callback_id}.json",
-            Bucket=settings.CALLBACK_BUCKET,
-        )
+        try:
+            cb = Callback(**callback)
+            self.s3.put_object(
+                Body=bytes(cb.json(), "utf-8"),
+                Key=f"callbacks/{cb.enrolment_id}/{cb.callback_id}.json",
+                Bucket=settings.CALLBACK_BUCKET,
+            )
+        except Exception as exception:
+            raise exception
 
         return cb
 
@@ -42,10 +44,13 @@ class S3CallbackRepo(CallbackRepo):
         enrolment_repo = S3EnrolmentRepo()
         # check if enrolment exists, it will raise error if it doesn't
         enrolment_repo.get_enrolment(enrolment_id)
-        # get callbacks for enrolment id
-        callbacks_objects_list = self.s3.list_objects(
-            Bucket=settings.CALLBACK_BUCKET, Prefix="{}/".format(enrolment_id)
-        )
+        try:
+            # get callbacks for enrolment id
+            callbacks_objects_list = self.s3.list_objects(
+                Bucket=settings.CALLBACK_BUCKET, Prefix="{}/".format(enrolment_id)
+            )
+        except Exception as exception:
+            raise exception
         # print("callbacks_objects_list", callbacks_objects_list)
         callbacks_list = []
         # If there have been 0 callbacks, the list should be empty.

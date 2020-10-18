@@ -28,19 +28,21 @@ class S3EnrolmentRepo(EnrolmentRepo):
 
         enrl = Enrolment(**enrollment)
         ref_hash = Random.get_str_hash(enrl.internal_reference)
+        try:
+            self.s3.put_object(
+                Body=bytes(enrl.enrolment_id, "utf-8"),
+                Key=f"employer_reference/{ref_hash}/enrolment_id.json",
+                Bucket=settings.ENROLMENT_BUCKET,
+            )
 
-        self.s3.put_object(
-            Body=bytes(enrl.enrolment_id, "utf-8"),
-            Key=f"employer_reference/{ref_hash}/enrolment_id.json",
-            Bucket=settings.ENROLMENT_BUCKET,
-        )
-
-        self.s3.put_object(
-            Body=bytes(enrl.json(), "utf-8"),
-            # Body=bytes(enrl.shared_secret, "utf-8"),
-            Key=f"enrolments/{enrl.enrolment_id}.json",
-            Bucket=settings.ENROLMENT_BUCKET,
-        )
+            self.s3.put_object(
+                Body=bytes(enrl.json(), "utf-8"),
+                # Body=bytes(enrl.shared_secret, "utf-8"),
+                Key=f"enrolments/{enrl.enrolment_id}.json",
+                Bucket=settings.ENROLMENT_BUCKET,
+            )
+        except Exception as exception:
+            raise exception
 
         return enrl
 
@@ -66,11 +68,14 @@ class S3EnrolmentRepo(EnrolmentRepo):
             enrolment_id,
             settings.ENROLMENT_BUCKET,
         )
-        obj = self.s3.get_object(
-            Key=f"enrolments/{enrolment_id}.json", Bucket=settings.ENROLMENT_BUCKET
-        )
-        enrolment = Enrolment(**json.loads(obj["Body"].read().decode()))
-        return enrolment
+        try:
+            obj = self.s3.get_object(
+                Key=f"enrolments/{enrolment_id}.json", Bucket=settings.ENROLMENT_BUCKET
+            )
+            enrolment = Enrolment(**json.loads(obj["Body"].read().decode()))
+            return enrolment
+        except Exception:
+            raise Exception("No such enrolment")
 
     def get_enrolment_status(self, enrolment_id: str):
         callbacks_list = callback_repo.get_callbacks_list(enrolment_id)

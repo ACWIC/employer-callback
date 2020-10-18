@@ -100,13 +100,8 @@ def test_create_new_callback_failure_on_invalid_enrolment_id():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
 
-    error_message = (
-        "NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: "
-        "The specified key does not exist."
-    )
-    enrolment_repo.get_enrolment.return_value = (
-        ResponseFailure.build_from_resource_error(message=error_message)
-    )
+    error_message = Exception("No such enrolment")
+    enrolment_repo.get_enrolment.side_effect = error_message
 
     request = CallbackRequest(  # Send invalid enrolment ID
         enrolment_id=dummy_invalid_enrolment_id,
@@ -119,7 +114,10 @@ def test_create_new_callback_failure_on_invalid_enrolment_id():
 
     repo.save_callback.assert_not_called()
     assert response.type == FailureType.RESOURCE_ERROR
-    assert response.message == error_message
+    expected_message = ResponseFailure.build_from_resource_error(
+        message=error_message
+    ).message
+    assert response.message == expected_message
 
 
 def test_create_new_callback_failure_on_invalid_shared_secret():
