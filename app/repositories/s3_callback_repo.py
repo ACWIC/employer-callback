@@ -34,11 +34,6 @@ class S3CallbackRepo(CallbackRepo):
         return cb
 
     def get_callbacks_list(self, enrolment_id: str):
-        print(
-            "get_callbacks_list() enrolment_id, BUCKET",
-            enrolment_id,
-            settings.CALLBACK_BUCKET,
-        )
         from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 
         enrolment_repo = S3EnrolmentRepo()
