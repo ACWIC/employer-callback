@@ -37,9 +37,9 @@ class S3CallbackRepo(CallbackRepo):
         from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 
         enrolment_repo = S3EnrolmentRepo()
-        # check if enrolment exists, it will raise error if it doesn't
-        enrolment_repo.get_enrolment(enrolment_id)
         try:
+            # check if enrolment exists, it will raise error if it doesn't
+            enrolment_repo.get_enrolment(enrolment_id)
             # get callbacks for enrolment id
             callbacks_objects_list = self.s3.list_objects(
                 Bucket=settings.CALLBACK_BUCKET, Prefix="{}/".format(enrolment_id)
