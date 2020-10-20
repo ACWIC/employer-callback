@@ -6,7 +6,10 @@ import boto3
 from app.config import settings
 from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
+from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.utils.error_handling import handle_s3_errors
+
+enrolment_repo = S3EnrolmentRepo()
 
 
 class S3CallbackRepo(CallbackRepo):
@@ -29,9 +32,6 @@ class S3CallbackRepo(CallbackRepo):
         return cb
 
     def get_callbacks_list(self, enrolment_id: str):
-        from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
-
-        enrolment_repo = S3EnrolmentRepo()
         # check if enrolment exists, it will raise error if it doesn't
         enrolment_repo.get_enrolment(enrolment_id)
         with handle_s3_errors():

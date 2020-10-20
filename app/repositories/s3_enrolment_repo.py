@@ -6,11 +6,8 @@ import boto3
 from app.config import settings
 from app.domain.entities.enrolment import Enrolment
 from app.repositories.enrolment_repo import EnrolmentRepo
-from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.utils.error_handling import handle_s3_errors
 from app.utils.random import Random
-
-callback_repo = S3CallbackRepo()
 
 
 class S3EnrolmentRepo(EnrolmentRepo):
@@ -70,8 +67,7 @@ class S3EnrolmentRepo(EnrolmentRepo):
             enrolment = Enrolment(**json.loads(obj["Body"].read().decode()))
             return enrolment
 
-    def get_enrolment_status(self, enrolment_id: str):
-        callbacks_list = callback_repo.get_callbacks_list(enrolment_id)
+    def get_enrolment_status(self, enrolment_id: str, callbacks_list: list):
         total_callbacks = len(callbacks_list["callbacks_list"])
         most_recent_callback = ""
         for row in callbacks_list["callbacks_list"]:

@@ -13,12 +13,14 @@ def handle_s3_errors():
         yield
     except ClientError as error:
         if error.response["Error"]["Code"] == "NoSuchKey":
-            raise S3Exception("No such enrolment")
+            raise S3Exception(
+                "Object with the specified key doesn't exist in the bucket."
+            )
         else:
             raise S3Exception(
-                f"Client Error!\nPlease check the error code and message: "
-                f"{error.response['Error']['Code']}"
-                f"{error.response['Error']['Message']}"
+                f"Client Error!\nPlease check the error code and message below."
+                f"\nCode: {error.response['Error']['Code']}"
+                f"\nMessage: {error.response['Error']['Message']}"
             )
     except ParamValidationError as error:
         raise ValueError(f"The parameters you provided are incorrect: {error}")
