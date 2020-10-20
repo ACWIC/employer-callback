@@ -6,6 +6,8 @@ from datetime import datetime
 from unittest import mock
 from uuid import uuid4
 
+from botocore.exceptions import ClientError
+
 from app.domain.entities.callback import Callback
 from app.domain.entities.enrolment import Enrolment
 from app.repositories.callback_repo import CallbackRepo
@@ -100,7 +102,8 @@ def test_create_new_callback_failure_on_invalid_enrolment_id():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
 
-    error_message = Exception("No such enrolment")
+    error_response = {"Code": "NoSuchKey"}
+    error_message = ClientError(error_response=error_response, operation_name="TEST")
     enrolment_repo.get_enrolment.side_effect = error_message
 
     request = CallbackRequest(  # Send invalid enrolment ID
