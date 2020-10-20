@@ -21,7 +21,6 @@ class S3EnrolmentRepo(EnrolmentRepo):
         with handle_s3_errors():
             self.s3 = boto3.client("s3", **settings.s3_configuration)
 
-
     def save_enrolment(self, enrollment: dict):
 
         enrl = Enrolment(**enrollment)
