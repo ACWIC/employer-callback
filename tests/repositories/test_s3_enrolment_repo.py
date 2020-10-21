@@ -12,6 +12,7 @@ from uuid import UUID
 from app.config import settings
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.utils import Random
+from tests.test_data.callback_provider import CallbackDataProvider
 
 
 @patch("boto3.client")
@@ -106,19 +107,7 @@ def test_get_enrolment_status(boto_client, uuid4, callback_repo_list):
     and that get_enrolment_status returns appropriate object.
     """
     repo = S3EnrolmentRepo()
-    # settings.ENROLMENT_BUCKET = "some-bucket"
-    callback_id = Random.get_uuid()
-    callback_id_2 = Random.get_uuid()
-
-    callback_received = "2020-10-07 15:37:16.727308"
-    callback_received_2 = "2020-10-07 16:37:16.727308"
-
-    callback_repo_list.return_value = {
-        "callbacks_list": [
-            {"callback_id": callback_id, "received": callback_received},
-            {"callback_id": callback_id_2, "received": callback_received_2},
-        ]
-    }
+    callback_repo_list.return_value = CallbackDataProvider().callback_repo_list
 
     enrolment_status = repo.get_enrolment_status(
         enrolment_id="look-at-my-enrolment-id",
@@ -126,7 +115,10 @@ def test_get_enrolment_status(boto_client, uuid4, callback_repo_list):
     )["status"]
     print("enrolment_status", enrolment_status, type(enrolment_status))
 
-    assert str(enrolment_status["most_recent_callback"]) == "2020-10-07 16:37:16.727308"
+    assert (
+        str(enrolment_status["most_recent_callback"])
+        == CallbackDataProvider().received_str_2
+    )
     assert str(enrolment_status["total_callbacks"]) == "2"
 
     callback_repo_list.return_value = {"callbacks_list": []}
