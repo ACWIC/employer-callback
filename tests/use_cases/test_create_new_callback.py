@@ -1,12 +1,10 @@
 """
 These tests evaluate (and document) the business logic.
 """
-from datetime import datetime
 from unittest import mock
 
 from botocore.exceptions import ClientError
 
-from app.domain.entities.enrolment import Enrolment
 from app.repositories.callback_repo import CallbackRepo
 from app.repositories.enrolment_repo import EnrolmentRepo
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
@@ -24,12 +22,7 @@ def test_create_new_callback_success():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
     callback = CallbackDataProvider().sample_callback
-    enrolment = Enrolment(
-        created=datetime.now(),
-        enrolment_id=CallbackDataProvider().enrolment_id,
-        shared_secret=CallbackDataProvider().shared_secret,
-        internal_reference=CallbackDataProvider().internal_reference,
-    )
+    enrolment = CallbackDataProvider().sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.return_value = callback
 
@@ -51,12 +44,7 @@ def test_create_new_callback_failure():
     """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=S3EnrolmentRepo)
-    enrolment = Enrolment(
-        created=datetime.now(),
-        enrolment_id=CallbackDataProvider().enrolment_id,
-        shared_secret=CallbackDataProvider().shared_secret,
-        internal_reference=CallbackDataProvider().internal_reference,
-    )
+    enrolment = CallbackDataProvider().sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.side_effect = Exception()
 
@@ -92,12 +80,7 @@ def test_create_new_callback_failure_on_invalid_shared_secret():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
 
-    enrolment = Enrolment(
-        created=datetime.now(),
-        enrolment_id=CallbackDataProvider().enrolment_id,
-        shared_secret=CallbackDataProvider().shared_secret,
-        internal_reference=CallbackDataProvider().internal_reference,
-    )
+    enrolment = CallbackDataProvider().sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
 
     request = CallbackDataProvider().sample_invalid_callback_request
