@@ -1,12 +1,10 @@
 import random
 from datetime import datetime
 from unittest import mock
-from unittest.mock import patch
 from uuid import uuid4
 
 from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
-from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.responses import FailureType, SuccessType
 from app.use_cases.get_callbacks_list import GetCallbacksList
 
@@ -48,14 +46,3 @@ def test_get_callbacks_list_failure():
     response = use_case.execute(dummy_enrolment_id)
 
     assert response.type == FailureType.RESOURCE_ERROR
-
-
-@patch("boto3.client")
-def test_get_callbacks_list_failure_2(boto_client):
-    repo = S3CallbackRepo()
-    use_case = GetCallbacksList(callback_repo=repo)
-    boto_client.side_effect = Exception("Connection Error")
-    response = use_case.execute(dummy_enrolment_id)
-
-    assert response.type == FailureType.RESOURCE_ERROR
-    assert "Connection Error" in response.message
