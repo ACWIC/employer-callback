@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
@@ -27,6 +27,9 @@ def create_enrolment(inputs: NewEnrolmentRequest):
     """
     use_case = CreateNewEnrolment(enrolment_repo=enrolment_repo)
     response = use_case.execute(inputs)
+    if bool(response) is False:  # If request failed
+        raise HTTPException(status_code=response.type.value, detail=response.message)
+
     return response
 
 
@@ -45,6 +48,9 @@ def get_enrolment_by_id(enrolment_id: str):  # TODO: typing, return enrolment su
     """
     use_case = GetEnrolmentByID(enrolment_repo=enrolment_repo)
     response = use_case.execute(enrolment_id)
+    if bool(response) is False:  # If request failed
+        raise HTTPException(status_code=response.type.value, detail=response.message)
+
     return response
 
 
@@ -61,8 +67,13 @@ def get_enrolment_status(enrolment_id: str):  # TODO: typing, return enrolment s
       that relate to state changes.
     * use these message-types to calculate the current state
     """
-    use_case = GetEnrolmentStatus(enrolment_repo=enrolment_repo)
+    use_case = GetEnrolmentStatus(
+        enrolment_repo=enrolment_repo, callback_repo=callback_repo
+    )
     response = use_case.execute(enrolment_id)
+    if bool(response) is False:  # If request failed
+        raise HTTPException(status_code=response.type.value, detail=response.message)
+
     return response
 
 
@@ -79,5 +90,8 @@ def get_callbacks_list_for_enrolment(
     * use these message-types to calculate the current state
     """
     use_case = GetCallbacksList(callback_repo=callback_repo)
-    callbacks_list = use_case.execute(enrolment_id)
-    return callbacks_list
+    response = use_case.execute(enrolment_id)
+    if bool(response) is False:  # If request failed
+        raise HTTPException(status_code=response.type.value, detail=response.message)
+
+    return response
