@@ -35,6 +35,24 @@ def test_get_callbacks_list_failure():
     assert response.type == FailureType.RESOURCE_ERROR
 
 
+@patch("json.loads")
+@patch("app.repositories.s3_enrolment_repo.S3EnrolmentRepo.get_enrolment")
+@patch("uuid.uuid4")
+@patch("boto3.client")
+def test_empty_callbacks_list(boto_client, uuid4, repo_get_enrolment, json_loads):
+    enrolment_id = "look-at-my-enrolment-id"
+    fixed_uuid_str = "1dad3dd8-af28-4e61-ae23-4c93a456d10e"
+    uuid4.return_value = UUID(fixed_uuid_str)
+    repo = S3CallbackRepo()
+    settings.ENROLMENT_BUCKET = "some-bucket"
+    settings.CALLBACK_BUCKET = "some-bucket1"
+    repo_get_enrolment.return_value = True
+    boto_client.return_value.list_objects = list_objects_empty_content
+    json_loads.return_value = CallbackDataProvider().sample_callback_dict
+    callbacks_list = repo.get_callbacks_list(enrolment_id=enrolment_id)
+    assert callbacks_list == CallbackDataProvider().sample_empty_callback_list
+
+
 @patch("app.repositories.s3_enrolment_repo.S3EnrolmentRepo.get_enrolment")
 @patch("uuid.uuid4")
 @patch("boto3.client")
@@ -95,3 +113,7 @@ def list_objects_sample_content(Bucket, Prefix):
             }
         ]
     }
+
+
+def list_objects_empty_content(Bucket, Prefix):
+    return {}

@@ -38,8 +38,9 @@ class CallbackDataProvider:  # (BaseModel):
             received=dummy_received,
             payload=dummy_payload,
         )
-        self.sample_course_dict = vars(self.sample_callback)
+        self.sample_callback_dict = vars(self.sample_callback)
         self.sample_get_callback_list = {"callbacks_list": [self.sample_callback]}
+        self.sample_empty_callback_list = {"callbacks_list": []}
 
         self.sample_callback_request = CallbackRequest(
             enrolment_id=dummy_enrolment_id,
