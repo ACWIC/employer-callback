@@ -55,17 +55,12 @@ class S3EnrolmentRepo(EnrolmentRepo):
             return False
 
     def get_enrolment(self, enrolment_id: str):
-        print(
-            "get_enrolment() enrolment_id, BUCKET",
-            enrolment_id,
-            settings.ENROLMENT_BUCKET,
-        )
         with handle_s3_errors():
             obj = self.s3.get_object(
                 Key=f"enrolments/{enrolment_id}.json", Bucket=settings.ENROLMENT_BUCKET
             )
-            enrolment = Enrolment(**json.loads(obj["Body"].read().decode()))
-            return enrolment
+        enrolment = Enrolment(**json.loads(obj["Body"].read().decode()))
+        return enrolment
 
     def get_enrolment_status(self, enrolment_id: str, callbacks_list: list):
         total_callbacks = len(callbacks_list["callbacks_list"])

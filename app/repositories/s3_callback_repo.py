@@ -21,8 +21,8 @@ class S3CallbackRepo(CallbackRepo):
             self.s3 = boto3.client("s3", **settings.s3_configuration)
 
     def save_callback(self, callback: dict) -> Callback:
+        cb = Callback(**callback)
         with handle_s3_errors():
-            cb = Callback(**callback)
             self.s3.put_object(
                 Body=bytes(cb.json(), "utf-8"),
                 Key=f"callbacks/{cb.enrolment_id}/{cb.callback_id}.json",
@@ -43,14 +43,14 @@ class S3CallbackRepo(CallbackRepo):
         # If there have been 0 callbacks, the list should be empty.
         if "Contents" not in callbacks_objects_list:
             return {"callbacks_list": callbacks_list}
-        with handle_s3_errors():
-            # add callback_id and datetime in list
-            for row in callbacks_objects_list["Contents"]:
+        # add callback_id and datetime in list
+        for row in callbacks_objects_list["Contents"]:
+            with handle_s3_errors():
                 obj = self.s3.get_object(
                     Key=row["Key"], Bucket=settings.CALLBACK_BUCKET
                 )
-                callback = Callback(**json.loads(obj["Body"].read().decode()))
-                callbacks_list.append(
-                    {"callback_id": callback.callback_id, "received": callback.received}
-                )
+            callback = Callback(**json.loads(obj["Body"].read().decode()))
+            callbacks_list.append(
+                {"callback_id": callback.callback_id, "received": callback.received}
+            )
         return {"callbacks_list": callbacks_list}
