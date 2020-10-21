@@ -25,7 +25,7 @@ def handle_s3_errors():
     except ParamValidationError as error:
         raise ValueError(f"The parameters you provided are incorrect: {error}")
     except Exception as exception:
-        if not isinstance(Exception, BotoCoreError):
+        if not isinstance(exception, BotoCoreError):
             raise Exception(
                 f"Unknown Error! This might be a Python Error.\n"
                 f"Please check the error message: {exception}"
