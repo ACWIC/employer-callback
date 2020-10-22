@@ -6,6 +6,7 @@ orbs:
   codecov: codecov/codecov@1.0.2
   flake8: arrai/flake8@6.0.0
   aws-cli: circleci/aws-cli@1.3.0
+  slack: circleci/slack@4.0.2
 
 jobs:
   build-and-test:
@@ -27,6 +28,12 @@ jobs:
           destination: reports
       - codecov/upload:
           file: test-reports/coverage.xml
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
   code-style-checks:
     # check https://github.com/marketplace/actions/flake8-annotator for adding github comments
     executor: python/default
@@ -38,6 +45,12 @@ jobs:
           wd: .
       - flake8/flake8_warnings:
           wd: .
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
   pre-commit-hooks:
     executor: python/default
     steps:
@@ -57,12 +70,20 @@ jobs:
 workflows:
   main:
     jobs:
-      - build-and-test
-      - code-style-checks
-      - pre-commit-hooks
+      - build-and-test:
+          context:
+            - slack-secrets
+      - code-style-checks:
+          context:
+            - slack-secrets
+      - pre-commit-hooks:
+          context:
+            - slack-secrets
       - deploy:
           requires:
             - build-and-test
           filters:
             branches:
               only: main
+          context:
+            - slack-secrets

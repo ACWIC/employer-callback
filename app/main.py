@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.callbacks import router as v1_router
 from app.api.enrolments import router as v1_enrolment_router
 
+
 API_GATEWAY_STAGE_PREFIX = os.environ.get("STAGE_PREFIX", default="")
 API_GATEWAY_SERVICE_PREFIX = os.environ.get("SERVICE_PREFIX", default="")
 
@@ -15,6 +16,8 @@ app = FastAPI(
     openapi_url=API_GATEWAY_SERVICE_PREFIX + "/openapi.json",
     docs_url=API_GATEWAY_SERVICE_PREFIX + "/docs",
 )
+
+
 
 app.add_middleware(
     CORSMiddleware,
