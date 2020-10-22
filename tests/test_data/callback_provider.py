@@ -52,7 +52,7 @@ class CallbackDataProvider:  # (BaseModel):
         self.sample_callback_2 = Callback(
             callback_id=self.callback_id_2,
             enrolment_id=self.enrolment_id,
-            shared_secret=self.shared_secret,
+            shared_secret=self.invalid_shared_secret,
             tp_sequence=self.tp_ref,
             received=self.received_2,
             payload=self.payload,

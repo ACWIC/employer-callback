@@ -37,13 +37,13 @@ class S3CallbackRepo(CallbackRepo):
 
         return False, None
 
-    def save_callback(self, callback: dict) -> Callback:
+    def save_callback(self, callback: dict) -> (bool, Callback):
         cb = Callback(**callback)
         is_callback_exists, callback_obj = self.is_callback_already_exists(cb)
-        is_created = True
         if is_callback_exists:
             is_created = False
             return is_created, callback_obj
+        is_created = True
         with handle_s3_errors():
             self.s3.put_object(
                 Body=bytes(cb.json(), "utf-8"),
