@@ -1,86 +1,31 @@
-# Aged Care Provider Callback API
+# Employer Callback API
 
-This is a FastAPI app that is built to run on AWS Lambda via the API Gateway.
-It is deployed with the `serverless` tool, which manges dealing with AWS. It can
-also run locally with `serverless-offline` in a mode which mimics API Gateway/lambda
-infrastructure. This mode leverages local services like Minio as replacements for 
-AWS resources like S3.
+This is a reference implementation of a proposed API
+enabling Training Providers to interact with Aged Care Providers
+(employers) in a standardised way.
 
-## Installation
+Specifically, it provides the endpoints for sending information
+to the employer, to be used by the training provider.
 
-Everything is managed with docker-compose. The configuration for this is stored in
-`local.yml`, so it can be convenient to set this in your shell first:
-```
-export COMPOSE_FILE=local.yml
-```
+This is a companion service to https://github.com/ACWIC/employer-admin
 
-1. `docker-compose build` - build everything
-2. `docker-compose up -d` - run everything in daemon mode
+Detailed technical documentation is in the docs/ folder.
+DEPLOYMENT.md and DEVELOPMENT.md contain information about running
+the software and making changes to it.
 
-There are two components:
-2. API documentation (via uvicorn/FastAPI directly)
-3. minio
+There is a test endpoint
+with a self-documenting API specification here:
 
-## Configuration
+* https://izu2v5346l.execute-api.us-east-1.amazonaws.com/dev/cb/docs
 
-Default configuration is provided under `.envs/.local/`, which includes
-everything required for the components to work together.
+This is equivalent to what you will have running locally
+if you create a local development environment
+(per DEPLOYMENT.md)
 
-
-### Running locally
-```
-docker-compose up
-```
-
-The service will be available on port 8081
-
-Open `localhost:8081/docs` for swagger documentation.
-
-## Configuration:
-
-There's two expected environment variables:
-
-`STAGE_PREFIX`: API gateways add a prefix after the domain, but it's not passed down to the service.
-But if the service is called from a Javascript application like swagger UI, the prefix has be provided.
-`STAGE_PREFIX` should is expected to be provided by the serverless runner.
-
-
-`SERVICE_PREFIX`: When deploying more than one service under the same API gateway, a prefix is used to
-map to each service. this prefix is passed to the service itself, and all URLs are expected to be prepended
-with it. (unlike the `STAGE_PREFIX`)
-
-Note that all both variables are managed and provided from serverless, and you don't need to think about them
-during development.
-
----
-
-**A note about local resources**
-
-docker-compose will not auto-create S3 buckets in minio, so this must be done manually first.
-See the configuration in .envs/.local/.sls to determine what buckets are needed.
----
-
-## Tests
-
-Tests are run with pytest, which can be executed with the shortcut make command:
-```
-make test
-```
-
-## Style guide
-We follow the guidelines offered by black, isort, and flake8
-
-### pre-commit
-We use pre-commit to enforce style checks before committing code in git.
-
-Please install it from [pre-commit](https://pre-commit.com/)
-then run `pre-commit install`
-
-Note that on the first time you run `git commit`, it's gonna take sometime 
-to install all the hooks, but after that it will be fast.
-
-to check your code style without having to do `git commit`, run:
- 
- `pre-commit run`: It will check your staged files, and print any issues
- 
- `pre-commit run -a`: It will check all the project files
+The test endpoint is continuously deployed
+from the `main` branch in this repository,
+so should be considered unstable.
+It is also completely open
+(do not require authentication),
+which is not a realistic simulation
+of any kind of production environment.
