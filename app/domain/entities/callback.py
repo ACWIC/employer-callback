@@ -10,3 +10,18 @@ class Callback(BaseModel):
     received: datetime
     tp_sequence: int
     payload: dict
+
+    def to_dict(self):
+        return vars(self)
+
+    def __eq__(self, obj):
+        ignored = ["callback_id", "received"]
+        d1 = self.to_dict()
+        d2 = obj.to_dict()
+        for k1, v1 in d1.items():
+            if k1 not in ignored and (k1 not in d2 or d2[k1] != v1):
+                return False
+        for k2, v2 in d2.items():
+            if k2 not in ignored and k2 not in d1:
+                return False
+        return True

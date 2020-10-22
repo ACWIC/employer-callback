@@ -20,8 +20,30 @@ class S3CallbackRepo(CallbackRepo):
         with handle_s3_errors():
             self.s3 = boto3.client("s3", **settings.s3_configuration)
 
+    def is_callback_already_exists(self, new_callback: Callback):
+        with handle_s3_errors():
+            callbacks = self.s3.list_objects(Bucket=settings.CALLBACK_BUCKET)
+        if "Contents" not in callbacks:
+            return False, None
+
+        for row in callbacks["Contents"]:
+            with handle_s3_errors():
+                obj = self.s3.get_object(
+                    Key=row["Key"], Bucket=settings.CALLBACK_BUCKET
+                )
+            callback = Callback(**json.loads(obj["Body"].read().decode()))
+            if callback == new_callback:
+                return True, callback
+
+        return False, None
+
     def save_callback(self, callback: dict) -> Callback:
         cb = Callback(**callback)
+        is_callback_exists, callback_obj = self.is_callback_already_exists(cb)
+        is_created = True
+        if is_callback_exists:
+            is_created = False
+            return is_created, callback_obj
         with handle_s3_errors():
             self.s3.put_object(
                 Body=bytes(cb.json(), "utf-8"),
@@ -29,7 +51,7 @@ class S3CallbackRepo(CallbackRepo):
                 Bucket=settings.CALLBACK_BUCKET,
             )
 
-        return cb
+        return is_created, cb
 
     def get_callbacks_list(self, enrolment_id: str):
         # check if enrolment exists, it will raise error if it doesn't

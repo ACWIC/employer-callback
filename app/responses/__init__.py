@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class SuccessType(int, Enum):
     SUCCESS = 200
+    CREATED = 201
 
 
 class FailureType(int, Enum):
@@ -53,7 +54,7 @@ class ResponseFailure(BaseModel):
 
 class ResponseSuccess(BaseModel):
     value: dict
-    type = SuccessType.SUCCESS
+    type: SuccessType = SuccessType.SUCCESS
     message: str = "Success"
 
     def __bool__(self):

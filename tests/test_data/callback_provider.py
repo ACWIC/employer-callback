@@ -57,14 +57,14 @@ class CallbackDataProvider:  # (BaseModel):
             received=self.received_2,
             payload=self.payload,
         )
-        self.sample_callback_dict = vars(self.sample_callback)
+        self.sample_callback_dict = self.sample_callback.to_dict()
         self.sample_get_callback_list = {"callbacks_list": [self.sample_callback]}
         self.sample_empty_callback_list = {"callbacks_list": []}
 
         self.callback_repo_list = {
             "callbacks_list": [
-                vars(self.sample_callback),
-                vars(self.sample_callback_2),
+                self.sample_callback.to_dict(),
+                self.sample_callback_2.to_dict(),
             ]
         }
 

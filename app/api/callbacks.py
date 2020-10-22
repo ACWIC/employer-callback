@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
+from app.responses import SuccessType
 from app.use_cases.create_new_callback import CreateNewCallback
 
 router = APIRouter()
@@ -10,7 +11,7 @@ callback_repo = S3CallbackRepo()
 enrolment_repo = S3EnrolmentRepo()
 
 
-@router.post("/callbacks")
+@router.post("/callbacks", status_code=SuccessType.CREATED)
 def create_callback(inputs: CallbackRequest):
     """Message from Training Provider to Employer.
 
