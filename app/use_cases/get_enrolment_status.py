@@ -21,4 +21,4 @@ class GetEnrolmentStatus(BaseModel):
         except Exception as e:  # noqa - TODO: handle specific failure types
             return ResponseFailure.build_from_resource_error(message=e)
 
-        return ResponseSuccess(value=enrolment_status)
+        return ResponseSuccess(value=enrolment_status).build()

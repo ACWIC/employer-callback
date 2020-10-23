@@ -59,15 +59,11 @@ class ResponseSuccess(BaseModel):
     type: SuccessType = SuccessType.SUCCESS
     message: str = "Success"
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._build()
-
     def __bool__(self):
         return True
 
-    def _build(self):
+    def build(self):
         content = jsonable_encoder(
             {"value": self.value, "message": self.message, "type": self.type}
         )
-        return JSONResponse(content=content, status_code=self.type)
+        return JSONResponse(content=content, status_code=self.type.value)
