@@ -6,11 +6,15 @@ from app.domain.entities.callback import Callback
 
 class CallbackRepo(abc.ABC):
     @abc.abstractmethod
-    def save_callback(self, callback: dict) -> (bool, Callback):
+    def get_callback(self, callback: Callback) -> Callback:
         """"""
 
     @abc.abstractmethod
-    def is_callback_already_exists(self, callback: Callback):
+    def save_callback(self, callback: dict) -> Callback:
+        """"""
+
+    @abc.abstractmethod
+    def callback_exists(self, callback_obj: Callback) -> bool:
         """"""
 
     @abc.abstractmethod

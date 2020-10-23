@@ -46,7 +46,7 @@ def test_save_callback(boto_client):
         "payload": test_data.payload,
         "received": test_data.received,
     }
-    is_created, callback = repo.save_callback(params)
+    callback = repo.save_callback(params)
 
     assert callback.callback_id == test_data.callback_id
 
@@ -76,13 +76,12 @@ def test_save_callback_already_exists(json_loads):
     )
     json_loads.return_value = callback.to_dict()
     with stubber:
-        is_created, callback_obj = repo.save_callback(callback_dict)
+        callback_obj = repo.save_callback(callback_dict)
 
-    assert is_created is False
     assert callback_obj == callback
 
 
-def test_is_callback_already_exists_empty_callbacks():
+def test_callback_exists_empty_callbacks():
     repo = S3CallbackRepo()
     callback = test_data.sample_callback
     stubber = Stubber(repo.s3)
@@ -92,14 +91,11 @@ def test_is_callback_already_exists_empty_callbacks():
         {"Bucket": "put-callbacks-here"},
     )
     with stubber:
-        is_exists, callback_obj = repo.is_callback_already_exists(callback)
-
-    assert is_exists is False
-    assert callback_obj is None
+        assert repo.callback_exists(callback.to_dict()) is False
 
 
 @patch("json.loads")
-def test_is_callback_already_exists_true(json_loads):
+def test_callback_exists_true(json_loads):
     repo = S3CallbackRepo()
     callback = test_data.sample_callback
     callback_id = test_data.callback_id
@@ -116,14 +112,11 @@ def test_is_callback_already_exists_true(json_loads):
         {"Bucket": "put-callbacks-here", "Key": test_data.callback_id},
     )
     with stubber:
-        is_exists, callback_obj = repo.is_callback_already_exists(callback)
-
-    assert is_exists is True
-    assert callback_obj == callback
+        assert repo.callback_exists(callback.to_dict()) is True
 
 
 @patch("json.loads")
-def test_is_callback_already_exists_false(json_loads):
+def test_callback_exists_false(json_loads):
     repo = S3CallbackRepo()
     callback = test_data.sample_callback
     callback_id = test_data.callback_id
@@ -141,7 +134,4 @@ def test_is_callback_already_exists_false(json_loads):
         {"Bucket": "put-callbacks-here", "Key": callback_id},
     )
     with stubber:
-        is_exists, callback_obj = repo.is_callback_already_exists(callback)
-
-    assert is_exists is False
-    assert callback_obj is None
+        assert repo.callback_exists(callback.to_dict()) is False

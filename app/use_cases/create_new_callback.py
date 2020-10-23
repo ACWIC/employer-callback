@@ -38,14 +38,16 @@ class CreateNewCallback(BaseModel):
                 return ResponseFailure.build_from_unauthorised_error(
                     message="'shared_secret' key doesn't match"
                 )
-            is_created, callback = self.callback_repo.save_callback(params)
+
+            if self.callback_repo.callback_exists(params):
+                code = SuccessType.SUCCESS
+                message = "The callback has been fetched from the server."
+            else:
+                code = SuccessType.CREATED
+                message = "The callback has been saved."
+            callback = self.callback_repo.save_callback(params)
+            print(callback)
         except Exception as e:
             return ResponseFailure.build_from_resource_error(message=e)
-
-        code = SuccessType.SUCCESS
-        message = "The callback has been fetched from the server."
-        if is_created:
-            code = SuccessType.CREATED
-            message = "The callback has been saved."
 
         return ResponseSuccess(value=callback, message=message, type=code)
