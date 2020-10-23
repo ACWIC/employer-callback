@@ -5,17 +5,18 @@ The are testing the encapsulation of the "impure" code
 the repos should return pure domain objects
 of the appropriate type.
 """
-import json
 from datetime import datetime
-from io import BytesIO
 from os import environ
 from unittest.mock import patch
 
 from botocore.stub import Stubber
-from fastapi.encoders import jsonable_encoder
 
 from app.config import settings
 from app.repositories.s3_callback_repo import S3CallbackRepo
+from tests.test_data.boto_client_responses import (
+    get_object_response,
+    list_objects_response,
+)
 from tests.test_data.callback_provider import CallbackDataProvider
 
 
@@ -66,9 +67,12 @@ def test_save_callback_already_exists(json_loads):
     repo = S3CallbackRepo()
     stubber = Stubber(repo.s3)
     callback = CallbackDataProvider().sample_callback
+    callback_id = CallbackDataProvider().callback_id
     callback_dict = CallbackDataProvider().sample_callback_dict
     stubber.add_response(
-        "list_objects", list_objects_response(), {"Bucket": "put-callbacks-here"}
+        "list_objects",
+        list_objects_response([callback_id]),
+        {"Bucket": "put-callbacks-here"},
     )
     stubber.add_response(
         "get_object",
@@ -102,10 +106,13 @@ def list_objects_empty_content(Bucket):
 def test_is_callback_already_exists_true(json_loads):
     repo = S3CallbackRepo()
     callback = CallbackDataProvider().sample_callback
+    callback_id = CallbackDataProvider().callback_id
     stubber = Stubber(repo.s3)
     json_loads.return_value = callback.to_dict()
     stubber.add_response(
-        "list_objects", list_objects_response(), {"Bucket": "put-callbacks-here"}
+        "list_objects",
+        list_objects_response([callback_id]),
+        {"Bucket": "put-callbacks-here"},
     )
     stubber.add_response(
         "get_object",
@@ -119,87 +126,23 @@ def test_is_callback_already_exists_true(json_loads):
     assert callback_obj == callback
 
 
-def list_objects_response():
-    return {
-        "IsTruncated": True,
-        "Marker": "string",
-        "NextMarker": "string",
-        "Contents": [
-            {
-                "Key": CallbackDataProvider().callback_id,
-                "LastModified": datetime(2015, 1, 1),
-                "ETag": "string",
-                "Size": 123,
-                "StorageClass": "STANDARD",
-                "Owner": {"DisplayName": "string", "ID": "string"},
-            },
-        ],
-        "Name": "string",
-        "Prefix": "string",
-        "Delimiter": "string",
-        "MaxKeys": 123,
-        "CommonPrefixes": [
-            {"Prefix": "string"},
-        ],
-        "EncodingType": "url",
-    }
-
-
-def get_object_response(callback):
-    callback = json.dumps(jsonable_encoder(callback.to_dict()), indent=2).encode(
-        "utf-8"
-    )
-    output = BytesIO()
-    output.write(callback)
-    return {
-        "Body": output,
-        "DeleteMarker": True,
-        "AcceptRanges": "string",
-        "Expiration": "string",
-        "Restore": "string",
-        "LastModified": datetime(2015, 1, 1),
-        "ContentLength": 123,
-        "ETag": "string",
-        "MissingMeta": 123,
-        "VersionId": "string",
-        "CacheControl": "string",
-        "ContentDisposition": "string",
-        "ContentEncoding": "string",
-        "ContentLanguage": "string",
-        "ContentRange": "string",
-        "ContentType": "string",
-        "Expires": datetime(2015, 1, 1),
-        "WebsiteRedirectLocation": "string",
-        "ServerSideEncryption": "AES256",
-        "Metadata": {"string": "string"},
-        "SSECustomerAlgorithm": "string",
-        "SSECustomerKeyMD5": "string",
-        "SSEKMSKeyId": "string",
-        "StorageClass": "STANDARD",
-        "RequestCharged": "requester",
-        "ReplicationStatus": "COMPLETE",
-        "PartsCount": 123,
-        "TagCount": 123,
-        "ObjectLockMode": "GOVERNANCE",
-        "ObjectLockRetainUntilDate": datetime(2015, 1, 1),
-        "ObjectLockLegalHoldStatus": "ON",
-    }
-
-
 @patch("json.loads")
 def test_is_callback_already_exists_false(json_loads):
     repo = S3CallbackRepo()
     callback = CallbackDataProvider().sample_callback
+    callback_id = CallbackDataProvider().callback_id
     callback_2 = CallbackDataProvider().sample_callback_2
     stubber = Stubber(repo.s3)
     json_loads.return_value = callback_2.to_dict()
     stubber.add_response(
-        "list_objects", list_objects_response(), {"Bucket": "put-callbacks-here"}
+        "list_objects",
+        list_objects_response([callback_id]),
+        {"Bucket": "put-callbacks-here"},
     )
     stubber.add_response(
         "get_object",
         get_object_response(callback_2),
-        {"Bucket": "put-callbacks-here", "Key": CallbackDataProvider().callback_id},
+        {"Bucket": "put-callbacks-here", "Key": callback_id},
     )
     with stubber:
         is_exists, callback_obj = repo.is_callback_already_exists(callback)

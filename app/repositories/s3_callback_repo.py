@@ -32,8 +32,6 @@ class S3CallbackRepo(CallbackRepo):
                     Key=row["Key"], Bucket=settings.CALLBACK_BUCKET
                 )
             callback = Callback(**json.loads(obj["Body"].read().decode()))
-            print(new_callback)
-            print(callback)
             if callback == new_callback:
                 return True, callback
 

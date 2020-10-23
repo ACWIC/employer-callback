@@ -42,7 +42,7 @@ class ResponseFailure(BaseModel):
         return cls(type=FailureType.SYSTEM_ERROR, message=cls._format_message(message))
 
     @classmethod
-    def validation_error(cls, message=None):
+    def build_from_validation_error(cls, message=None):
         return cls(
             type=FailureType.VALIDATION_ERROR, message=cls._format_message(message)
         )
