@@ -79,7 +79,6 @@ def list_objects_empty_response():
         "IsTruncated": True,
         "Marker": "string",
         "NextMarker": "string",
-        "Contents": [],
         "Name": "string",
         "Prefix": "string",
         "Delimiter": "string",

@@ -12,21 +12,18 @@ from app.responses import FailureType, ResponseFailure, SuccessType
 from app.use_cases.create_new_callback import CreateNewCallback
 from tests.test_data.callback_provider import CallbackDataProvider
 
+test_data = CallbackDataProvider()
+
 
 def test_create_new_callback_success():
-    """
-    When creating a new enrollment authorisation,
-    if everything goes according to plan,
-    the response type should be "Success".
-    """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
-    callback = CallbackDataProvider().sample_callback
-    enrolment = CallbackDataProvider().sample_enrolment
+    callback = test_data.sample_callback
+    enrolment = test_data.sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.return_value = (True, callback)
 
-    request = CallbackDataProvider().sample_callback_request
+    request = test_data.sample_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
@@ -37,19 +34,14 @@ def test_create_new_callback_success():
 
 
 def test_create_new_callback_idempotence():
-    """
-    When creating a new enrollment authorisation,
-    if everything goes according to plan,
-    the response type should be "Success".
-    """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
-    callback = CallbackDataProvider().sample_callback
-    enrolment = CallbackDataProvider().sample_enrolment
+    callback = test_data.sample_callback
+    enrolment = test_data.sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.side_effect = [(True, callback), (False, callback)]
 
-    request = CallbackDataProvider().sample_callback_request
+    request = test_data.sample_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     # Try to save same callback twice
     use_case.execute(request)
@@ -57,25 +49,20 @@ def test_create_new_callback_idempotence():
 
     assert response.type == SuccessType.SUCCESS
     assert response.message == "The callback has been fetched from the server."
-    assert response.value.get("callback_id") == CallbackDataProvider().callback_id
+    assert response.value.get("callback_id") == test_data.callback_id
     assert response.value.get("enrolment_id") == enrolment.enrolment_id
     assert response.value.get("shared_secret") == enrolment.shared_secret
-    assert response.value.get("received") == CallbackDataProvider().received
+    assert response.value.get("received") == test_data.received
 
 
 def test_create_new_callback_failure():
-    """
-    When creating a new enrollment authorisation,
-    if there is some kind of error,
-    the response type should be "ResourceError".
-    """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=S3EnrolmentRepo)
-    enrolment = CallbackDataProvider().sample_enrolment
+    enrolment = test_data.sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
     repo.save_callback.side_effect = Exception()
 
-    request = CallbackDataProvider().sample_callback_request
+    request = test_data.sample_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
@@ -91,7 +78,7 @@ def test_create_new_callback_failure_on_invalid_enrolment_id():
     error_message = ClientError(error_response=error_response, operation_name="TEST")
     enrolment_repo.get_enrolment.side_effect = error_message
 
-    request = CallbackDataProvider().sample_callback_request
+    request = test_data.sample_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
@@ -107,10 +94,10 @@ def test_create_new_callback_failure_on_invalid_shared_secret():
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
 
-    enrolment = CallbackDataProvider().sample_enrolment
+    enrolment = test_data.sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
 
-    request = CallbackDataProvider().sample_invalid_callback_request
+    request = test_data.sample_invalid_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
     response = use_case.execute(request)
 
