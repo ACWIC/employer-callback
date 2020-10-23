@@ -57,9 +57,30 @@ def test_save_callback(boto_client):
     boto_client.return_value.put_object.assert_called_once_with(
         Body=bytes(callback.json(), "utf-8"),
         Key=f"callbacks/{callback.enrolment_id}/{callback.callback_id}.json",
-        # NOQA
         Bucket=settings.CALLBACK_BUCKET,
     )
+
+
+@patch("json.loads")
+def test_save_callback_already_exists(json_loads):
+    repo = S3CallbackRepo()
+    stubber = Stubber(repo.s3)
+    callback = CallbackDataProvider().sample_callback
+    callback_dict = CallbackDataProvider().sample_callback_dict
+    stubber.add_response(
+        "list_objects", list_objects_response(), {"Bucket": "put-callbacks-here"}
+    )
+    stubber.add_response(
+        "get_object",
+        get_object_response(callback),
+        {"Bucket": "put-callbacks-here", "Key": CallbackDataProvider().callback_id},
+    )
+    json_loads.return_value = callback.to_dict()
+    with stubber:
+        is_created, callback_obj = repo.save_callback(callback_dict)
+
+    assert is_created is False
+    assert callback_obj == callback
 
 
 @patch("boto3.client")
@@ -84,10 +105,12 @@ def test_is_callback_already_exists_true(json_loads):
     stubber = Stubber(repo.s3)
     json_loads.return_value = callback.to_dict()
     stubber.add_response(
-        "list_objects", list_objects(), {"Bucket": "put-callbacks-here"}
+        "list_objects", list_objects_response(), {"Bucket": "put-callbacks-here"}
     )
     stubber.add_response(
-        "get_object", get_object(), {"Bucket": "put-callbacks-here", "Key": "string"}
+        "get_object",
+        get_object_response(callback),
+        {"Bucket": "put-callbacks-here", "Key": CallbackDataProvider().callback_id},
     )
     with stubber:
         is_exists, callback_obj = repo.is_callback_already_exists(callback)
@@ -96,14 +119,14 @@ def test_is_callback_already_exists_true(json_loads):
     assert callback_obj == callback
 
 
-def list_objects():
+def list_objects_response():
     return {
-        "IsTruncated": True | False,
+        "IsTruncated": True,
         "Marker": "string",
         "NextMarker": "string",
         "Contents": [
             {
-                "Key": "string",
+                "Key": CallbackDataProvider().callback_id,
                 "LastModified": datetime(2015, 1, 1),
                 "ETag": "string",
                 "Size": 123,
@@ -122,8 +145,7 @@ def list_objects():
     }
 
 
-def get_object():
-    callback = CallbackDataProvider().sample_callback
+def get_object_response(callback):
     callback = json.dumps(jsonable_encoder(callback.to_dict()), indent=2).encode(
         "utf-8"
     )
@@ -162,3 +184,25 @@ def get_object():
         "ObjectLockRetainUntilDate": datetime(2015, 1, 1),
         "ObjectLockLegalHoldStatus": "ON",
     }
+
+
+@patch("json.loads")
+def test_is_callback_already_exists_false(json_loads):
+    repo = S3CallbackRepo()
+    callback = CallbackDataProvider().sample_callback
+    callback_2 = CallbackDataProvider().sample_callback_2
+    stubber = Stubber(repo.s3)
+    json_loads.return_value = callback_2.to_dict()
+    stubber.add_response(
+        "list_objects", list_objects_response(), {"Bucket": "put-callbacks-here"}
+    )
+    stubber.add_response(
+        "get_object",
+        get_object_response(callback_2),
+        {"Bucket": "put-callbacks-here", "Key": CallbackDataProvider().callback_id},
+    )
+    with stubber:
+        is_exists, callback_obj = repo.is_callback_already_exists(callback)
+
+    assert is_exists is False
+    assert callback_obj is None
