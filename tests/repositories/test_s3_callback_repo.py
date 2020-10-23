@@ -5,8 +5,6 @@ The are testing the encapsulation of the "impure" code
 the repos should return pure domain objects
 of the appropriate type.
 """
-from datetime import datetime
-from os import environ
 from unittest.mock import patch
 
 from botocore.stub import Stubber
@@ -38,25 +36,19 @@ def test_save_callback(boto_client):
     Ensure the S3CallbackRepo returns an object with OK data
     and that an appropriate boto3 put call was made.
     """
-    callback_id = "1dad3dd8-af28-4e61-ae23-4c93a456d10e"
-    e_id = "the_employer_generated_this_identifier"
-    k = "the_employer_generated_this_secret"
-    tp_seq = 9876543
-    pl = {"say": "what?"}
     repo = S3CallbackRepo()
-    environ["CALLBACK_BUCKET"] = "some-bucket"
 
     params = {
-        "callback_id": callback_id,
-        "enrolment_id": e_id,
-        "shared_secret": k,
-        "tp_sequence": tp_seq,
-        "payload": pl,
-        "received": datetime.now(),
+        "callback_id": test_data.callback_id,
+        "enrolment_id": test_data.enrolment_id,
+        "shared_secret": test_data.shared_secret,
+        "tp_sequence": test_data.tp_ref,
+        "payload": test_data.payload,
+        "received": test_data.received,
     }
     is_created, callback = repo.save_callback(params)
 
-    assert callback.callback_id == callback_id
+    assert callback.callback_id == test_data.callback_id
 
     boto_client.return_value.put_object.assert_called_once_with(
         Body=bytes(callback.json(), "utf-8"),
