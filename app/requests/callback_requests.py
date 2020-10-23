@@ -1,8 +1,12 @@
+from typing import List
+
 from app.requests import ValidRequest
 
 
 class CallbackRequest(ValidRequest):
-    enrolment_id: str
+    sender_sequence: int
+    message_type_version: str
     shared_secret: str
-    tp_sequence: int
-    payload: dict
+    enrolment_id: str
+    structured_data: dict
+    attachments: List[dict]

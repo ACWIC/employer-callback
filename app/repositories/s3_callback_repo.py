@@ -4,8 +4,9 @@ from typing import Any
 import boto3
 
 from app.config import settings
-from app.domain.entities.callback import Callback
+from app.domain.entities.callback import CallbackEvent
 from app.repositories.callback_repo import CallbackRepo
+from app.requests.callback_requests import CallbackRequest
 
 
 class S3CallbackRepo(CallbackRepo):
@@ -16,16 +17,15 @@ class S3CallbackRepo(CallbackRepo):
 
         self.s3 = boto3.client("s3", **settings.s3_configuration)
 
-    def save_callback(self, callback: dict) -> Callback:
-        cb = Callback(**callback)
-
+    def save_callback(self, request: CallbackRequest) -> CallbackEvent:
+        instance = CallbackEvent.from_request(request)
         self.s3.put_object(
-            Body=bytes(cb.json(), "utf-8"),
-            Key=f"callbacks/{cb.enrolment_id}/{cb.callback_id}.json",
+            Body=instance.serialize(),
+            Key=f"callbacks/{instance.enrolment_id}/{instance.uid}.json",
             Bucket=settings.CALLBACK_BUCKET,
         )
 
-        return cb
+        return instance
 
     def get_callbacks_list(self, enrolment_id: str):
         print(
@@ -50,7 +50,7 @@ class S3CallbackRepo(CallbackRepo):
         # add callback_id and datetime in list
         for row in callbacks_objects_list["Contents"]:
             obj = self.s3.get_object(Key=row["Key"], Bucket=settings.CALLBACK_BUCKET)
-            callback = Callback(**json.loads(obj["Body"].read().decode()))
+            callback = CallbackEvent(**json.loads(obj["Body"].read().decode()))
             callbacks_list.append(
                 {"callback_id": callback.callback_id, "received": callback.received}
             )
