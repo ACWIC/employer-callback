@@ -21,7 +21,8 @@ def test_create_new_callback_success():
     callback = test_data.sample_callback
     enrolment = test_data.sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
-    repo.save_callback.return_value = (True, callback)
+    repo.callback_exists.return_value = False
+    repo.save_callback.return_value = callback
 
     request = test_data.sample_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
@@ -39,7 +40,8 @@ def test_create_new_callback_idempotence():
     callback = test_data.sample_callback
     enrolment = test_data.sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
-    repo.save_callback.side_effect = [(True, callback), (False, callback)]
+    repo.callback_exists.side_effect = [False, True]
+    repo.save_callback.side_effect = [callback, callback]
 
     request = test_data.sample_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)
