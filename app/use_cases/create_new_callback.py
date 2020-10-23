@@ -48,4 +48,4 @@ class CreateNewCallback(BaseModel):
             code = SuccessType.CREATED
             message = "The callback has been saved."
 
-        return ResponseSuccess(value=callback, message=message, type=code).build()
+        return ResponseSuccess(value=callback, message=message, type=code)

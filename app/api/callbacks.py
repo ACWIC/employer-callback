@@ -64,4 +64,4 @@ def create_callback(inputs: CallbackRequest):
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)
 
-    return response
+    return response.build()

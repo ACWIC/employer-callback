@@ -30,7 +30,7 @@ def create_enrolment(inputs: NewEnrolmentRequest):
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)
 
-    return response
+    return response.build()
 
 
 @router.get("/enrolments/{enrolment_id}")
@@ -51,7 +51,7 @@ def get_enrolment_by_id(enrolment_id: str):  # TODO: typing, return enrolment su
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)
 
-    return response
+    return response.build()
 
 
 @router.get("/enrolments/{enrolment_id}/status")
@@ -74,7 +74,7 @@ def get_enrolment_status(enrolment_id: str):  # TODO: typing, return enrolment s
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)
 
-    return response
+    return response.build()
 
 
 @router.get("/enrolments/{enrolment_id}/journal")
@@ -94,4 +94,4 @@ def get_callbacks_list_for_enrolment(
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)
 
-    return response
+    return response.build()
