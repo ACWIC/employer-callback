@@ -1,4 +1,4 @@
-from app.responses import FailureType, ResponseFailure, ResponseSuccess
+from app.responses import FailureType, ResponseFailure, ResponseSuccess, SuccessType
 
 
 def test_response_failure_type():
@@ -33,3 +33,12 @@ def test_response_failure_build_from_unauthorised_error():
         message="unauthorised error test"
     )
     assert response.type == FailureType.UNAUTHORISED_ERROR
+
+
+def test_response_success_build():
+    response = ResponseSuccess(
+        value={"test": "123"}, type=SuccessType.SUCCESS.value, message=""
+    )
+    json_response = response.build()
+    assert b'{"value":{"test":"123"}' in json_response.body
+    assert json_response.status_code == SuccessType.SUCCESS.value

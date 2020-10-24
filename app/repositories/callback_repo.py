@@ -6,7 +6,7 @@ from app.domain.entities.callback import Callback
 
 class CallbackRepo(abc.ABC):
     @abc.abstractmethod
-    def get_callback(self, callback: Callback) -> Callback:
+    def get_callback_from_cache(self, callback: Callback) -> Callback:
         """"""
 
     @abc.abstractmethod

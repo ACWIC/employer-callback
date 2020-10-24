@@ -22,19 +22,13 @@ class S3CallbackRepo(CallbackRepo):
         # Cached objects
         self.callbacks = list()
 
-    def get_callback(self, callback_dict: dict) -> Callback:
+    def get_callback_from_cache(self, callback_dict: dict) -> Callback:
         callback_obj = Callback(**callback_dict)
-        # check cached objects first
         for callback in self.callbacks:
             if callback == callback_obj:
                 return callback
-        #
-        # enrolment_id = callback_obj.enrolment_id
-        # callbacks = self.get_callbacks_list(enrolment_id)
-        # for callback in callbacks["callbacks_list"]:
-        #     if callback == callback_obj:
-        #         return callback
-        # return None
+        # This line should be never reached
+        return  # noqa
 
     def callback_exists(self, callback_dict: dict) -> bool:
         callback_obj = Callback(**callback_dict)
@@ -52,7 +46,7 @@ class S3CallbackRepo(CallbackRepo):
 
     def save_callback(self, callback: dict) -> Callback:
         if self.callback_exists(callback):
-            cb = self.get_callback(callback)
+            cb = self.get_callback_from_cache(callback)
         else:
             cb = Callback(**callback)
             with handle_s3_errors():

@@ -38,14 +38,7 @@ def test_save_callback(boto_client):
     """
     repo = S3CallbackRepo()
 
-    params = {
-        "callback_id": test_data.callback_id,
-        "enrolment_id": test_data.enrolment_id,
-        "shared_secret": test_data.shared_secret,
-        "tp_sequence": test_data.tp_ref,
-        "payload": test_data.payload,
-        "received": test_data.received,
-    }
+    params = test_data.sample_callback_dict
     callback = repo.save_callback(params)
 
     assert callback.callback_id == test_data.callback_id
@@ -116,6 +109,32 @@ def test_callback_exists_true(json_loads):
 
 
 @patch("json.loads")
+def test_callback_exists_true_with_cache(json_loads):
+    repo = S3CallbackRepo()
+    callback = test_data.sample_callback
+    # add callback to cache
+    repo.callbacks.append(callback)
+    callback_id = test_data.callback_id
+    stubber = Stubber(repo.s3)
+    json_loads.return_value = callback.to_dict()
+    stubber.add_response(
+        "list_objects",
+        list_objects_response([callback_id]),
+        {"Bucket": "put-callbacks-here"},
+    )
+    stubber.add_response(
+        "get_object",
+        get_object_response(callback),
+        {"Bucket": "put-callbacks-here", "Key": test_data.callback_id},
+    )
+    with stubber:
+        assert repo.callback_exists(callback.to_dict()) is True
+    # Assert that same callback is not appended to list
+    assert len(repo.callbacks) == 1
+    assert repo.callbacks[0] == callback
+
+
+@patch("json.loads")
 def test_callback_exists_false(json_loads):
     repo = S3CallbackRepo()
     callback = test_data.sample_callback
@@ -135,3 +154,37 @@ def test_callback_exists_false(json_loads):
     )
     with stubber:
         assert repo.callback_exists(callback.to_dict()) is False
+
+
+def test_get_callback_from_cache():
+    """Ensure that get callback from cache returns correct callback object"""
+    repo = S3CallbackRepo()
+    callback = test_data.sample_callback
+    callback_dict = test_data.sample_callback_dict
+    repo.callbacks.append(callback)
+    cb = repo.get_callback_from_cache(callback_dict)
+
+    assert cb == callback
+
+
+def test_get_callback_from_cache_none():
+    """Ensure that get_callback_from_cache() returns None
+    if callback_dict is not in cached callbacks"""
+    repo = S3CallbackRepo()
+    callback_dict = test_data.sample_callback_dict
+    cb = repo.get_callback_from_cache(callback_dict)
+
+    assert cb is None
+
+
+def test_get_callback_from_cache_none_2():
+    """Ensure that get_callback_from_cache() returns None
+    if callback_dict is not in cached callbacks"""
+    repo = S3CallbackRepo()
+    # Push a callback that is not the same with callback_dict
+    callback_2 = test_data.sample_callback_2
+    repo.callbacks.append(callback_2)
+    callback_dict = test_data.sample_callback_dict
+    cb = repo.get_callback_from_cache(callback_dict)
+
+    assert cb is None
