@@ -47,6 +47,6 @@ def test_save_callback(boto_client):
 
     boto_client.return_value.put_object.assert_called_once_with(
         Body=bytes(callback.json(), "utf-8"),
-        Key=f"callbacks/{callback.enrolment_id}/{callback.callback_id}.json",  # NOQA
+        Key=f"callbacks/{callback.enrolment_id}/{callback.callback_id}.json",
         Bucket=settings.CALLBACK_BUCKET,
     )

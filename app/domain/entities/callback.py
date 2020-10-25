@@ -2,12 +2,12 @@ import base64
 import json
 import string
 from datetime import datetime
-from typing import List
-from uuid import UUID, uuid4
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
 from app.requests.callback_requests import CallbackRequest
+from app.utils import Random
 
 
 class Attachment(BaseModel):
@@ -53,17 +53,19 @@ class Attachment(BaseModel):
 
 
 class Callback(BaseModel):
-    #  event metadata
-    callback_id: UUID = Field(default_factory=uuid4)
+    #  event receipt
+    callback_id: str = Field(default_factory=Random().get_uuid)
     received: datetime = Field(default_factory=datetime.now)  # maybe use UTC
+
+    #  event metadata
+    enrolment_id: str
     sender_sequence: int
     message_type_version: str
     shared_secret: str
 
     #  event content
-    enrolment_id: str
     structured_data: bytes
-    attachments: List[Attachment]
+    attachments: Optional[List[Attachment]]
 
     @classmethod
     def from_request(cls, request: CallbackRequest):
@@ -83,13 +85,6 @@ class Callback(BaseModel):
         data.update({"structured_data": structured_data, "attachments": attachments})
 
         return cls(**data)
-
-    @property
-    def uid(self):
-        """
-        return callback_id UUID instance as a string.
-        """
-        return str(self.callback_id)
 
     @property
     def structured_data_decoded(self):

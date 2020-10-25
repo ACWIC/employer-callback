@@ -22,6 +22,7 @@ def test_create_new_callback_success():
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
     enrolment = CallbackDataProvider().sample_enrolment
     enrolment_repo.get_enrolment.return_value = enrolment
+    repo.save_callback.return_value = CallbackDataProvider().sample_callback
 
     request = CallbackDataProvider().sample_callback_request
     use_case = CreateNewCallback(callback_repo=repo, enrolment_repo=enrolment_repo)

@@ -1,23 +1,23 @@
 import base64
 import json
 from datetime import datetime
-from uuid import UUID, uuid4
 
 import pytest
 from pydantic import ValidationError
 
 import app.domain.entities.callback as cb
+from app.utils import Random
 from tests.domain.entities import factories
 
 
-def test_callback_event_valid():
+def test_callback_valid():
     """
     Ensure the callback data matches constructor values
     and the status is appropriately set.
     """
     event = factories.callback_event()
 
-    assert isinstance(event.callback_id, UUID)
+    assert isinstance(event.callback_id, str)
     assert isinstance(event.received, datetime)
     assert isinstance(event.enrolment_id, str)
     assert isinstance(event.sender_sequence, int)
@@ -28,7 +28,7 @@ def test_callback_event_valid():
     assert isinstance(event.attachments[0], cb.Attachment)
 
 
-def test_callback_event_from_request_valid():
+def test_callback_from_request_valid():
     """
     Ensure callback event created with from_request has proper encoded
     fields.
@@ -51,7 +51,7 @@ def test_callback_without_defaults_valid():
     Ensure creating a CallbackEvent instance with a provided
     callback_id and received values doesn't use the default factory.
     """
-    callback_id = uuid4()
+    callback_id = Random().get_uuid()
     received = datetime.now()
     event = factories.callback_event(callback_id=callback_id, received=received)
 

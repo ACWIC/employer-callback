@@ -48,6 +48,9 @@ class CallbackDataProvider:  # (BaseModel):
             tp_sequence=self.tp_ref,
             received=self.received,
             payload=self.payload,
+            sender_sequence=0,
+            message_type_version="test",
+            structured_data=b"test data",
         )
         self.sample_callback_2 = Callback(
             callback_id=self.callback_id_2,
@@ -56,6 +59,9 @@ class CallbackDataProvider:  # (BaseModel):
             tp_sequence=self.tp_ref,
             received=self.received_2,
             payload=self.payload,
+            sender_sequence=1,
+            message_type_version="test",
+            structured_data=b"test data",
         )
         self.sample_callback_dict = vars(self.sample_callback)
         self.sample_get_callback_list = {"callbacks_list": [self.sample_callback]}
@@ -73,12 +79,18 @@ class CallbackDataProvider:  # (BaseModel):
             shared_secret=self.shared_secret,
             tp_sequence=self.tp_ref,
             payload=self.payload,
+            sender_sequence=0,
+            message_type_version="test",
+            structured_data={"test": "data"},
         )
         self.sample_invalid_callback_request = CallbackRequest(
             enrolment_id=self.enrolment_id,
             shared_secret=self.invalid_shared_secret,
             tp_sequence=self.tp_ref,
             payload=self.payload,
+            sender_sequence=1,
+            message_type_version="test",
+            structured_data={"test": "data"},
         )
 
         self.sample_enrolment = Enrolment(

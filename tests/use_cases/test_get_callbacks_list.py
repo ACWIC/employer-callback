@@ -80,6 +80,9 @@ def test_get_callbacks_list(boto_client, uuid4, repo_get_enrolment):
                     "shared_secret": "04159571-6fa2-4d67-862a-ca9335372b03",
                     "tp_sequence": 0,
                     "payload": {},
+                    "sender_sequence": 1,
+                    "message_type_version": "test",
+                    "structured_data": b"test data",
                 }
             ]
         ),

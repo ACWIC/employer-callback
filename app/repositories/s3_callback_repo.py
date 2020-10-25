@@ -26,7 +26,7 @@ class S3CallbackRepo(CallbackRepo):
         with handle_s3_errors():
             self.s3.put_object(
                 Body=instance.serialize(),
-                Key=f"callbacks/{instance.enrolment_id}/{instance.uid}.json",
+                Key=f"callbacks/{instance.enrolment_id}/{instance.callback_id}.json",
                 Bucket=settings.CALLBACK_BUCKET,
             )
 

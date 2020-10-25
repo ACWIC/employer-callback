@@ -51,7 +51,7 @@ def callback_event(**overrides):
     if received:
         data.update({"received": received})
 
-    return cb.CallbackEvent(**data)
+    return cb.Callback(**data)
 
 
 def callback_event_from_request(request=None, **overrides):
@@ -69,4 +69,4 @@ def callback_event_from_request(request=None, **overrides):
         }
         request = cbr.CallbackRequest(**data)
 
-    return cb.CallbackEvent.from_request(request)
+    return cb.Callback.from_request(request)

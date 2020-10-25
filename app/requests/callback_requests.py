@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from app.requests import ValidRequest
 
@@ -9,4 +9,4 @@ class CallbackRequest(ValidRequest):
     shared_secret: str
     enrolment_id: str
     structured_data: dict
-    attachments: List[dict]
+    attachments: Optional[List[dict]]
