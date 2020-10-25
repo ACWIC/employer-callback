@@ -18,21 +18,17 @@ class CreateNewCallback(BaseModel):
 
     def execute(self, request: CallbackRequest):
         try:
-            enrolment_object_response = self.enrolment_repo.get_enrolment(
+            enrolment_object = self.enrolment_repo.get_enrolment(
                 enrolment_id=request.enrolment_id
             )
-            # return failed response if enrolment_id is invalid
-            if isinstance(enrolment_object_response, ResponseFailure):
-                return enrolment_object_response
             # If request isn't failed, then an Enrolment object is returned, check shared_secret
-            if enrolment_object_response.shared_secret != request.shared_secret:
+            if enrolment_object.shared_secret != request.shared_secret:
                 return ResponseFailure.build_from_unauthorised_error(
                     message="'shared_secret' key doesn't match"
                 )
-
             callback = self.callback_repo.save_callback(request)
             message = "The callback has been saved."
-        except Exception as e:  # noqa - TODO: handle specific failure types
+        except Exception as e:
             return ResponseFailure.build_from_resource_error(message=e)
 
         return ResponseSuccess(value=callback, message=message)

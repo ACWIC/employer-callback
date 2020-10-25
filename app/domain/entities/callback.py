@@ -52,7 +52,7 @@ class Attachment(BaseModel):
         return base64.b64decode(self.content)
 
 
-class CallbackEvent(BaseModel):
+class Callback(BaseModel):
     #  event metadata
     callback_id: UUID = Field(default_factory=uuid4)
     received: datetime = Field(default_factory=datetime.now)  # maybe use UTC
@@ -73,7 +73,7 @@ class CallbackEvent(BaseModel):
 
         this is implemented as a convenience to avoid duplicating
         fields
-        serializeion code needed for both `structured_data` & `attachments`
+        serialization code needed for both `structured_data` & `attachments`
         """
         structured_data = base64.b64encode(
             json.dumps(request.structured_data).encode("utf-8")
