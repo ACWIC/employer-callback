@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 
 def get_object_response(obj):
     """Returns a proper response for S3.client.get_object method"""
-    obj = json.dumps(jsonable_encoder(obj.to_dict()), indent=2).encode("utf-8")
+    obj = json.dumps(jsonable_encoder(obj.dict()), indent=2).encode("utf-8")
     output = BytesIO()
     output.write(obj)
     return {

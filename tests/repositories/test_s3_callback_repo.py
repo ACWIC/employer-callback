@@ -67,7 +67,7 @@ def test_save_callback_already_exists(json_loads):
         get_object_response(callback),
         {"Bucket": "put-callbacks-here", "Key": test_data.callback_id},
     )
-    json_loads.return_value = callback.to_dict()
+    json_loads.return_value = callback.dict()
     with stubber:
         callback_obj = repo.save_callback(callback_dict)
 
@@ -84,7 +84,7 @@ def test_callback_exists_empty_callbacks():
         {"Bucket": "put-callbacks-here"},
     )
     with stubber:
-        assert repo.callback_exists(callback.to_dict()) is False
+        assert repo.callback_exists(callback.dict()) is False
 
 
 @patch("json.loads")
@@ -93,7 +93,7 @@ def test_callback_exists_true(json_loads):
     callback = test_data.sample_callback
     callback_id = test_data.callback_id
     stubber = Stubber(repo.s3)
-    json_loads.return_value = callback.to_dict()
+    json_loads.return_value = callback.dict()
     stubber.add_response(
         "list_objects",
         list_objects_response([callback_id]),
@@ -105,7 +105,7 @@ def test_callback_exists_true(json_loads):
         {"Bucket": "put-callbacks-here", "Key": test_data.callback_id},
     )
     with stubber:
-        assert repo.callback_exists(callback.to_dict()) is True
+        assert repo.callback_exists(callback.dict()) is True
 
 
 @patch("json.loads")
@@ -116,7 +116,7 @@ def test_callback_exists_true_with_cache(json_loads):
     repo.callbacks.append(callback)
     callback_id = test_data.callback_id
     stubber = Stubber(repo.s3)
-    json_loads.return_value = callback.to_dict()
+    json_loads.return_value = callback.dict()
     stubber.add_response(
         "list_objects",
         list_objects_response([callback_id]),
@@ -128,7 +128,7 @@ def test_callback_exists_true_with_cache(json_loads):
         {"Bucket": "put-callbacks-here", "Key": test_data.callback_id},
     )
     with stubber:
-        assert repo.callback_exists(callback.to_dict()) is True
+        assert repo.callback_exists(callback.dict()) is True
     # Assert that same callback is not appended to list
     assert len(repo.callbacks) == 1
     assert repo.callbacks[0] == callback
@@ -141,7 +141,7 @@ def test_callback_exists_false(json_loads):
     callback_id = test_data.callback_id
     callback_2 = test_data.sample_callback_2
     stubber = Stubber(repo.s3)
-    json_loads.return_value = callback_2.to_dict()
+    json_loads.return_value = callback_2.dict()
     stubber.add_response(
         "list_objects",
         list_objects_response([callback_id]),
@@ -153,7 +153,7 @@ def test_callback_exists_false(json_loads):
         {"Bucket": "put-callbacks-here", "Key": callback_id},
     )
     with stubber:
-        assert repo.callback_exists(callback.to_dict()) is False
+        assert repo.callback_exists(callback.dict()) is False
 
 
 def test_get_callback_from_cache():
