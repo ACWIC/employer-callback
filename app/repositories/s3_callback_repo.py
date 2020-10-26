@@ -23,16 +23,14 @@ class S3CallbackRepo(CallbackRepo):
         # Cached objects
         self.callbacks = list()
 
-    def get_callback_from_cache(self, callback_dict: dict) -> Callback:
-        callback_obj = Callback(**callback_dict)
+    def get_callback_from_cache(self, callback_obj: Callback) -> Callback:
         for callback in self.callbacks:
             if callback == callback_obj:
                 return callback
         # This line should be never reached
         return  # noqa
 
-    def callback_exists(self, callback_dict: dict) -> bool:
-        callback_obj = Callback(**callback_dict)
+    def callback_exists(self, callback_obj: Callback) -> bool:
         with handle_s3_errors():
             callbacks = self.s3.list_objects(Bucket=settings.CALLBACK_BUCKET)
         if "Contents" not in callbacks:
@@ -46,11 +44,10 @@ class S3CallbackRepo(CallbackRepo):
         return False
 
     def save_callback(self, request: CallbackRequest) -> Callback:
-        callback = request.dict()
-        if self.callback_exists(callback):
-            cb = self.get_callback_from_cache(callback)
+        cb = Callback.from_request(request)
+        if self.callback_exists(cb):
+            cb = self.get_callback_from_cache(cb)
         else:
-            cb = Callback.from_request(request)
             with handle_s3_errors():
                 self.s3.put_object(
                     Body=bytes(cb.json(), "utf-8"),

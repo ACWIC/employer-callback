@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
 from app.repositories.s3_enrolment_repo import EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
@@ -27,15 +28,14 @@ class CreateNewCallback(BaseModel):
                 return ResponseFailure.build_from_unauthorised_error(
                     message="'shared_secret' key doesn't match"
                 )
-
-            if self.callback_repo.callback_exists(request):
+            cb = Callback.from_request(request)
+            if self.callback_repo.callback_exists(cb):
                 code = SuccessType.SUCCESS
                 message = "The callback has been fetched from the server."
             else:
                 code = SuccessType.CREATED
                 message = "The callback has been saved."
             callback = self.callback_repo.save_callback(request)
-            print(callback)
         except Exception as e:
             return ResponseFailure.build_from_resource_error(message=e)
 

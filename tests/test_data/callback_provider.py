@@ -30,12 +30,10 @@ class CallbackDataProvider:  # (BaseModel):
     def __init__(self):
         self.callback_id = "063c3fa8-5887-4cac-858e-fb6bf197215f"
         self.callback_id_2 = "b16f2b51-d4e9-4ed7-b5f0-3ad40a107239"
-        self.tp_ref = 123456
         self.received = datetime.datetime(2020, 10, 21, 16, 56, 21, 829226)
         self.received_str = str(datetime.datetime(2020, 10, 21, 16, 56, 21, 829226))
         self.received_2 = datetime.datetime(2020, 10, 22, 16, 56, 21, 829226)
         self.received_str_2 = str(datetime.datetime(2020, 10, 22, 16, 56, 21, 829226))
-        self.payload = {"data": "blbnjsd;fnbs"}
         self.enrolment_id = "eec43c8c-e32d-4c90-8eae-99ebcc76671a"
         self.shared_secret = "2c2b38cc-da04-4c55-8604-8869abed42d4"
         self.invalid_shared_secret = "791fa918-2897-48b9-8be8-fcc9262bf947"
@@ -45,20 +43,16 @@ class CallbackDataProvider:  # (BaseModel):
             callback_id=self.callback_id,
             enrolment_id=self.enrolment_id,
             shared_secret=self.shared_secret,
-            tp_sequence=self.tp_ref,
             received=self.received,
-            payload=self.payload,
             sender_sequence=0,
             message_type_version="test",
-            structured_data=b"test data",
+            structured_data=b"eyJ0ZXN0IjogImRhdGEifQ==",  # byte of '{"test": "data"}'
         )
         self.sample_callback_2 = Callback(
             callback_id=self.callback_id_2,
             enrolment_id=self.enrolment_id,
             shared_secret=self.invalid_shared_secret,
-            tp_sequence=self.tp_ref,
             received=self.received_2,
-            payload=self.payload,
             sender_sequence=1,
             message_type_version="test",
             structured_data=b"test data",
@@ -77,8 +71,6 @@ class CallbackDataProvider:  # (BaseModel):
         self.sample_callback_request = CallbackRequest(
             enrolment_id=self.enrolment_id,
             shared_secret=self.shared_secret,
-            tp_sequence=self.tp_ref,
-            payload=self.payload,
             sender_sequence=0,
             message_type_version="test",
             structured_data={"test": "data"},
@@ -86,8 +78,6 @@ class CallbackDataProvider:  # (BaseModel):
         self.sample_invalid_callback_request = CallbackRequest(
             enrolment_id=self.enrolment_id,
             shared_secret=self.invalid_shared_secret,
-            tp_sequence=self.tp_ref,
-            payload=self.payload,
             sender_sequence=1,
             message_type_version="test",
             structured_data={"test": "data"},

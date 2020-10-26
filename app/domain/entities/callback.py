@@ -80,9 +80,13 @@ class Callback(BaseModel):
         structured_data = base64.b64encode(
             json.dumps(request.structured_data).encode("utf-8")
         )
-        attachments = [Attachment.from_dict(attach) for attach in request.attachments]
         data = request.dict()
-        data.update({"structured_data": structured_data, "attachments": attachments})
+        data.update({"structured_data": structured_data})
+        if request.attachments:
+            attachments = [
+                Attachment.from_dict(attach) for attach in request.attachments
+            ]
+            data.update({"attachments": attachments})
 
         return cls(**data)
 

@@ -38,13 +38,16 @@ def test_save_callback(boto_client):
     """
     repo = S3CallbackRepo()
 
-    params = test_data.sample_callback_dict
-    callback = repo.save_callback(params)
+    request = test_data.sample_callback_request
+    callback = repo.save_callback(request)
 
-    assert callback.callback_id == test_data.callback_id
+    assert callback.enrolment_id == request.enrolment_id
+    assert callback.shared_secret == request.shared_secret
+    assert callback.sender_sequence == request.sender_sequence
+    assert callback.message_type_version == request.message_type_version
 
     boto_client.return_value.put_object.assert_called_once_with(
-        Body=bytes(callback.json(), "utf-8"),
+        Body=callback.serialize(),
         Key=f"callbacks/{callback.enrolment_id}/{callback.callback_id}.json",
         Bucket=settings.CALLBACK_BUCKET,
     )
@@ -55,8 +58,8 @@ def test_save_callback_already_exists(json_loads):
     repo = S3CallbackRepo()
     stubber = Stubber(repo.s3)
     callback = test_data.sample_callback
+    request = test_data.sample_callback_request
     callback_id = test_data.callback_id
-    callback_dict = test_data.sample_callback_dict
     stubber.add_response(
         "list_objects",
         list_objects_response([callback_id]),
@@ -69,7 +72,7 @@ def test_save_callback_already_exists(json_loads):
     )
     json_loads.return_value = callback.dict()
     with stubber:
-        callback_obj = repo.save_callback(callback_dict)
+        callback_obj = repo.save_callback(request)
 
     assert callback_obj == callback
 
@@ -84,7 +87,7 @@ def test_callback_exists_empty_callbacks():
         {"Bucket": "put-callbacks-here"},
     )
     with stubber:
-        assert repo.callback_exists(callback.dict()) is False
+        assert repo.callback_exists(callback) is False
 
 
 @patch("json.loads")
@@ -105,7 +108,7 @@ def test_callback_exists_true(json_loads):
         {"Bucket": "put-callbacks-here", "Key": test_data.callback_id},
     )
     with stubber:
-        assert repo.callback_exists(callback.dict()) is True
+        assert repo.callback_exists(callback) is True
 
 
 @patch("json.loads")
@@ -128,7 +131,7 @@ def test_callback_exists_true_with_cache(json_loads):
         {"Bucket": "put-callbacks-here", "Key": test_data.callback_id},
     )
     with stubber:
-        assert repo.callback_exists(callback.dict()) is True
+        assert repo.callback_exists(callback) is True
     # Assert that same callback is not appended to list
     assert len(repo.callbacks) == 1
     assert repo.callbacks[0] == callback
@@ -153,16 +156,15 @@ def test_callback_exists_false(json_loads):
         {"Bucket": "put-callbacks-here", "Key": callback_id},
     )
     with stubber:
-        assert repo.callback_exists(callback.dict()) is False
+        assert repo.callback_exists(callback) is False
 
 
 def test_get_callback_from_cache():
     """Ensure that get callback from cache returns correct callback object"""
     repo = S3CallbackRepo()
     callback = test_data.sample_callback
-    callback_dict = test_data.sample_callback_dict
     repo.callbacks.append(callback)
-    cb = repo.get_callback_from_cache(callback_dict)
+    cb = repo.get_callback_from_cache(callback)
 
     assert cb == callback
 
@@ -171,8 +173,8 @@ def test_get_callback_from_cache_none():
     """Ensure that get_callback_from_cache() returns None
     if callback_dict is not in cached callbacks"""
     repo = S3CallbackRepo()
-    callback_dict = test_data.sample_callback_dict
-    cb = repo.get_callback_from_cache(callback_dict)
+    callback = test_data.sample_callback
+    cb = repo.get_callback_from_cache(callback)
 
     assert cb is None
 
@@ -184,7 +186,7 @@ def test_get_callback_from_cache_none_2():
     # Push a callback that is not the same with callback_dict
     callback_2 = test_data.sample_callback_2
     repo.callbacks.append(callback_2)
-    callback_dict = test_data.sample_callback_dict
-    cb = repo.get_callback_from_cache(callback_dict)
+    callback = test_data.sample_callback
+    cb = repo.get_callback_from_cache(callback)
 
     assert cb is None
