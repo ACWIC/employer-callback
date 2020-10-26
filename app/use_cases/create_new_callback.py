@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from app.repositories.callback_repo import CallbackRepo
 from app.repositories.s3_enrolment_repo import EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
-from app.responses import ResponseFailure, ResponseSuccess
+from app.responses import ResponseFailure, ResponseSuccess, SuccessType
 from app.utils import Random
 
 
@@ -32,14 +32,22 @@ class CreateNewCallback(BaseModel):
             enrolment_object = self.enrolment_repo.get_enrolment(
                 enrolment_id=request.enrolment_id
             )
-            # If request isn't failed, then an Enrolment object is returned, check shared_secret
+            # If request isn't failed, then an Enrolment object is returned,
+            # check shared_secret
             if enrolment_object.shared_secret != request.shared_secret:
                 return ResponseFailure.build_from_unauthorised_error(
                     message="'shared_secret' key doesn't match"
                 )
+
+            if self.callback_repo.callback_exists(params):
+                code = SuccessType.SUCCESS
+                message = "The callback has been fetched from the server."
+            else:
+                code = SuccessType.CREATED
+                message = "The callback has been saved."
             callback = self.callback_repo.save_callback(params)
-            message = "The callback has been saved."
+            print(callback)
         except Exception as e:
             return ResponseFailure.build_from_resource_error(message=e)
 
-        return ResponseSuccess(value=callback, message=message)
+        return ResponseSuccess(value=callback, message=message, type=code)

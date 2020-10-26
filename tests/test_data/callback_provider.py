@@ -52,19 +52,19 @@ class CallbackDataProvider:  # (BaseModel):
         self.sample_callback_2 = Callback(
             callback_id=self.callback_id_2,
             enrolment_id=self.enrolment_id,
-            shared_secret=self.shared_secret,
+            shared_secret=self.invalid_shared_secret,
             tp_sequence=self.tp_ref,
             received=self.received_2,
             payload=self.payload,
         )
-        self.sample_callback_dict = vars(self.sample_callback)
+        self.sample_callback_dict = self.sample_callback.dict()
         self.sample_get_callback_list = {"callbacks_list": [self.sample_callback]}
         self.sample_empty_callback_list = {"callbacks_list": []}
 
         self.callback_repo_list = {
             "callbacks_list": [
-                vars(self.sample_callback),
-                vars(self.sample_callback_2),
+                self.sample_callback.dict(),
+                self.sample_callback_2.dict(),
             ]
         }
 

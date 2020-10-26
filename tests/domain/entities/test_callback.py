@@ -1,6 +1,7 @@
 import datetime
 
 import app.domain.entities.callback as cb
+from tests.test_data.callback_provider import CallbackDataProvider
 
 
 def test_callback_init():
@@ -29,3 +30,15 @@ def test_callback_init():
     assert callback.tp_sequence == tp_ref
     assert callback.received == rx
     assert callback.payload == pl
+
+
+def test_callback_compare_true():
+    callback_1 = CallbackDataProvider().sample_callback
+    callback_2 = CallbackDataProvider().sample_callback
+    assert callback_1 == callback_2
+
+
+def test_callback_compare_false():
+    callback_1 = CallbackDataProvider().sample_callback
+    callback_2 = CallbackDataProvider().sample_callback_2
+    assert callback_1 != callback_2
