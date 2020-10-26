@@ -8,6 +8,7 @@ from pydantic import ValidationError
 import app.domain.entities.callback as cb
 from app.utils import Random
 from tests.domain.entities import factories
+from tests.test_data.callback_provider import CallbackDataProvider
 
 
 def test_callback_valid():
@@ -84,3 +85,15 @@ def test_attachment_name_with_spaces_invalid():
         _ = factories.attachment_from_dict(name=name)
 
     assert "Provided name contains whitespaces" in str(excinfo.value)
+
+
+def test_callback_compare_true():
+    callback_1 = CallbackDataProvider().sample_callback
+    callback_2 = CallbackDataProvider().sample_callback
+    assert callback_1 == callback_2
+
+
+def test_callback_compare_false():
+    callback_1 = CallbackDataProvider().sample_callback
+    callback_2 = CallbackDataProvider().sample_callback_2
+    assert callback_1 != callback_2

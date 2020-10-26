@@ -110,3 +110,9 @@ class Callback(BaseModel):
         Return a utf-8 encoded json representation of a CallbackEvent instance.
         """
         return bytes(self.json(), "utf-8")
+
+    def __eq__(self, obj):
+        exclude = {"callback_id", "received"}
+        d1 = self.dict(exclude=exclude)
+        d2 = obj.dict(exclude=exclude)
+        return d1 == d2

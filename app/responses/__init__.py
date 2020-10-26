@@ -1,10 +1,13 @@
 from enum import Enum
 
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
 
 class SuccessType(int, Enum):
     SUCCESS = 200
+    CREATED = 201
 
 
 class FailureType(int, Enum):
@@ -39,7 +42,7 @@ class ResponseFailure(BaseModel):
         return cls(type=FailureType.SYSTEM_ERROR, message=cls._format_message(message))
 
     @classmethod
-    def validation_error(cls, message=None):
+    def build_from_validation_error(cls, message=None):
         return cls(
             type=FailureType.VALIDATION_ERROR, message=cls._format_message(message)
         )
@@ -53,8 +56,14 @@ class ResponseFailure(BaseModel):
 
 class ResponseSuccess(BaseModel):
     value: dict
-    type = SuccessType.SUCCESS
+    type: SuccessType = SuccessType.SUCCESS
     message: str = "Success"
 
     def __bool__(self):
         return True
+
+    def build(self):
+        content = jsonable_encoder(
+            {"value": self.value, "message": self.message, "type": self.type}
+        )
+        return JSONResponse(content=content, status_code=self.type.value)

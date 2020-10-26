@@ -10,16 +10,16 @@ from app.responses import FailureType, SuccessType
 from app.use_cases.get_callbacks_list import GetCallbacksList
 from tests.test_data.callback_provider import CallbackDataProvider
 
+test_data = CallbackDataProvider()
+
 
 def test_get_callbacks_list_success():
     repo = mock.Mock(spec=CallbackRepo)
-    callback = CallbackDataProvider().sample_callback
+    callback = test_data.sample_callback
 
-    repo.get_callbacks_list.return_value = (
-        CallbackDataProvider().sample_get_callback_list
-    )
+    repo.get_callbacks_list.return_value = test_data.sample_get_callback_list
     use_case = GetCallbacksList(callback_repo=repo)
-    response = use_case.execute(CallbackDataProvider().enrolment_id)
+    response = use_case.execute(test_data.enrolment_id)
 
     assert response.type == SuccessType.SUCCESS
     assert "callbacks_list" in response.value
@@ -30,7 +30,7 @@ def test_get_callbacks_list_failure():
     repo = mock.Mock(spec=CallbackRepo)
     repo.get_callbacks_list.side_effect = Exception()
     use_case = GetCallbacksList(callback_repo=repo)
-    response = use_case.execute(CallbackDataProvider().enrolment_id)
+    response = use_case.execute(test_data.enrolment_id)
 
     assert response.type == FailureType.RESOURCE_ERROR
 
@@ -48,9 +48,9 @@ def test_empty_callbacks_list(boto_client, uuid4, repo_get_enrolment, json_loads
     settings.CALLBACK_BUCKET = "some-bucket1"
     repo_get_enrolment.return_value = True
     boto_client.return_value.list_objects = list_objects_empty_content
-    json_loads.return_value = CallbackDataProvider().sample_callback_dict
+    json_loads.return_value = test_data.sample_callback_dict
     callbacks_list = repo.get_callbacks_list(enrolment_id=enrolment_id)
-    assert callbacks_list == CallbackDataProvider().sample_empty_callback_list
+    assert callbacks_list == test_data.sample_empty_callback_list
 
 
 @patch("app.repositories.s3_enrolment_repo.S3EnrolmentRepo.get_enrolment")
@@ -89,7 +89,6 @@ def test_get_callbacks_list(boto_client, uuid4, repo_get_enrolment):
     ):
         boto_client.return_value.list_objects = list_objects_sample_content
         callbacks_list = repo.get_callbacks_list(enrolment_id=enrolment_id)
-        print("test callbacks_list", callbacks_list)
 
     assert callbacks_list == {
         "callbacks_list": [

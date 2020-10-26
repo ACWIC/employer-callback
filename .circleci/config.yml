@@ -47,22 +47,34 @@ jobs:
             pip install pre-commit
             pre-commit run -a
 
-  deploy:
+  deploy-to-dev:
     executor: aws-cli/default
     steps:
       - checkout
       - aws-cli/setup
       - run:
-          command: make deploy_lambda
+          command: make deploy_lambda STAGE=dev
+
+  deploy-to-prod:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup
+      - run:
+          command: make deploy_lambda STAGE=prod
 workflows:
   main:
     jobs:
       - build-and-test
       - code-style-checks
       - pre-commit-hooks
-      - deploy:
+      - deploy-to-dev:
           requires:
             - build-and-test
           filters:
             branches:
               only: main
+      - deploy-to-prod:
+          filters:
+            tags:
+              only: /v.*-stable/
