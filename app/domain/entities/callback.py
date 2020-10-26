@@ -106,7 +106,7 @@ class Callback(BaseModel):
         for now this only validates that it's not an empty string
         """
         if not value:
-            raise ValueError("message type version must not be an empty string")
+            raise ValueError("Message type version must not be an empty string!")
         return value
 
     def serialize(self):

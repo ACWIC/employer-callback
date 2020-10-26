@@ -7,8 +7,9 @@ from pydantic import ValidationError
 
 import app.domain.entities.callback as cb
 from app.utils import Random
-from tests.domain.entities import factories
 from tests.test_data.callback_provider import CallbackDataProvider
+
+test_data = CallbackDataProvider()
 
 
 def test_callback_valid():
@@ -16,7 +17,23 @@ def test_callback_valid():
     Ensure the callback data matches constructor values
     and the status is appropriately set.
     """
-    event = factories.callback_event()
+    event = test_data.sample_callback
+
+    assert isinstance(event.callback_id, str)
+    assert isinstance(event.received, datetime)
+    assert isinstance(event.enrolment_id, str)
+    assert isinstance(event.sender_sequence, int)
+    assert isinstance(event.message_type_version, str)
+    assert isinstance(event.shared_secret, str)
+    assert isinstance(event.structured_data, bytes)
+
+
+def test_callback_valid_with_attachment():
+    """
+    Ensure the callback data matches constructor values
+    and the status is appropriately set.
+    """
+    event = test_data.sample_callback_with_attachment
 
     assert isinstance(event.callback_id, str)
     assert isinstance(event.received, datetime)
@@ -38,9 +55,10 @@ def test_callback_from_request_valid():
     attachment = {"name": "dummy.txt", "content": b"empty"}
     encoded_data = base64.b64encode(json.dumps(data).encode("utf-8"))
     encoded_content = base64.b64encode(b"empty")
-    event = factories.callback_event_from_request(
-        structured_data=data, attachments=[attachment]
-    )
+    request = test_data.sample_callback_request
+    request.structured_data = data
+    request.attachments = [attachment]
+    event = cb.Callback.from_request(request)
 
     assert event.structured_data == encoded_data
     assert event.structured_data_decoded == data
@@ -54,7 +72,9 @@ def test_callback_without_defaults_valid():
     """
     callback_id = Random().get_uuid()
     received = datetime.now()
-    event = factories.callback_event(callback_id=callback_id, received=received)
+    callback_dict = test_data.sample_callback_dict
+    callback_dict.update({"callback_id": callback_id, "received": received})
+    event = cb.Callback(**callback_dict)
 
     assert event.callback_id == callback_id
     assert event.received == received
@@ -67,7 +87,7 @@ def test_attachment_from_dict_valid():
     """
     content = b"this is an dummy file content"
     content_encoded = base64.b64encode(content)
-    attachment = factories.attachment_from_dict(content=content)
+    attachment = cb.Attachment.from_dict({"content": content, "name": "dummy.txt"})
 
     assert attachment.name == "dummy.txt"
     assert attachment.content == content_encoded
@@ -80,20 +100,29 @@ def test_attachment_name_with_spaces_invalid():
     will raise a validation error.
     """
     name = "dummy with spaces.txt"
-
+    content = b"this is an dummy file content"
+    content_encoded = base64.b64encode(content)
     with pytest.raises(ValidationError) as excinfo:
-        _ = factories.attachment_from_dict(name=name)
+        cb.Attachment.from_dict({"content": content_encoded, "name": name})
 
     assert "Provided name contains whitespaces" in str(excinfo.value)
 
 
+def test_message_type_version_invalid():
+    callback_dict = test_data.sample_callback_dict
+    callback_dict.update({"message_type_version": ""})
+    with pytest.raises(ValueError) as exception:
+        cb.Callback(**callback_dict)
+    assert "Message type version must not be an empty string!" in str(exception.value)
+
+
 def test_callback_compare_true():
-    callback_1 = CallbackDataProvider().sample_callback
-    callback_2 = CallbackDataProvider().sample_callback
+    callback_1 = test_data.sample_callback
+    callback_2 = test_data.sample_callback
     assert callback_1 == callback_2
 
 
 def test_callback_compare_false():
-    callback_1 = CallbackDataProvider().sample_callback
-    callback_2 = CallbackDataProvider().sample_callback_2
+    callback_1 = test_data.sample_callback
+    callback_2 = test_data.sample_callback_2
     assert callback_1 != callback_2
