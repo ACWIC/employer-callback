@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, validator
 
 from app.requests.callback_requests import CallbackRequest
 from app.utils import Random
+from app.utils.error_handling import handle_base64_errors
 
 
 class Attachment(BaseModel):
@@ -27,7 +28,8 @@ class Attachment(BaseModel):
         base64 encoded value.
         """
         content = data.get("content")
-        content_encoded = base64.b64encode(content)
+        with handle_base64_errors():
+            content_encoded = base64.urlsafe_b64encode(content)
         data.update({"content": content_encoded})
 
         return cls(**data)
@@ -49,7 +51,8 @@ class Attachment(BaseModel):
         """
         return a valid decoded value of the Attachment encoded content.
         """
-        return base64.b64decode(self.content)
+        with handle_base64_errors():
+            return base64.urlsafe_b64decode(self.content)
 
 
 class Callback(BaseModel):
@@ -77,9 +80,10 @@ class Callback(BaseModel):
         fields
         serialization code needed for both `structured_data` & `attachments`
         """
-        structured_data = base64.b64encode(
-            json.dumps(request.structured_data).encode("utf-8")
-        )
+        with handle_base64_errors():
+            structured_data = base64.urlsafe_b64encode(
+                json.dumps(request.structured_data).encode("utf-8")
+            )
         data = request.dict()
         data.update({"structured_data": structured_data})
         if request.attachments:
@@ -95,7 +99,8 @@ class Callback(BaseModel):
         """
         return a valid decoded JSON value of the event's structured_data
         """
-        decoded_data = base64.b64decode(self.structured_data)
+        with handle_base64_errors():
+            decoded_data = base64.urlsafe_b64decode(self.structured_data)
         return json.loads(decoded_data)
 
     @validator("message_type_version")
