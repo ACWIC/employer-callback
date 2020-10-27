@@ -52,17 +52,15 @@ def test_callback_from_request_valid():
     fields.
     """
     data = {"key": "value"}
-    attachment = {"name": "dummy.txt", "content": b"empty"}
-    encoded_data = base64.b64encode(json.dumps(data).encode("utf-8"))
-    encoded_content = base64.b64encode(b"empty")
+    encoded_data = base64.urlsafe_b64encode(json.dumps(data).encode("utf-8"))
     request = test_data.sample_callback_request
     request.structured_data = data
-    request.attachments = [attachment]
+    request.attachments = [test_data.attachment]
     event = cb.Callback.from_request(request)
 
     assert event.structured_data == encoded_data
     assert event.structured_data_decoded == data
-    assert event.attachments[0].content == encoded_content
+    assert event.attachments[0].content_decoded == test_data.attachment.content
 
 
 def test_callback_without_defaults_valid():
@@ -106,6 +104,22 @@ def test_attachment_name_with_spaces_invalid():
         cb.Attachment.from_dict({"content": content_encoded, "name": name})
 
     assert "Provided name contains whitespaces" in str(excinfo.value)
+
+
+def test_attachment_content_str():
+    """
+    Ensure Attachment data validation and from_dict
+    creates a valid attachment with encoded content
+    even content type is string.
+    """
+    content = "this is an dummy file content"
+    byte_content = bytes(content, "utf-8")
+    content_encoded = base64.b64encode(byte_content)
+    attachment = cb.Attachment.from_dict({"content": content, "name": "dummy.txt"})
+
+    assert attachment.name == "dummy.txt"
+    assert attachment.content == content_encoded
+    assert attachment.content_decoded == byte_content
 
 
 def test_message_type_version_invalid():

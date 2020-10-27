@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from app.requests.callback_requests import CallbackRequest
+from app.requests.callback_requests import AttachmentRequest, CallbackRequest
 from app.utils import Random
 from app.utils.error_handling import handle_base64_errors
 
@@ -28,11 +28,22 @@ class Attachment(BaseModel):
         base64 encoded value.
         """
         content = data.get("content")
+        if isinstance(content, str):
+            content = bytes(content, "utf-8")
         with handle_base64_errors():
             content_encoded = base64.urlsafe_b64encode(content)
         data.update({"content": content_encoded})
 
         return cls(**data)
+
+    @classmethod
+    def from_request(cls, data: AttachmentRequest):
+        """
+        Create an Attachment model instance with content as
+        base64 encoded value.
+        """
+        data = data.dict()
+        return cls.from_dict(data)
 
     @validator("name")
     def path_like_name(cls, value):
@@ -88,7 +99,7 @@ class Callback(BaseModel):
         data.update({"structured_data": structured_data})
         if request.attachments:
             attachments = [
-                Attachment.from_dict(attach) for attach in request.attachments
+                Attachment.from_request(attach) for attach in request.attachments
             ]
             data.update({"attachments": attachments})
 
