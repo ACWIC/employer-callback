@@ -6,6 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 import app.domain.entities.callback as cb
+from app.requests.callback_requests import AttachmentRequest
 from app.utils import Random
 from tests.test_data.callback_provider import CallbackDataProvider
 
@@ -106,7 +107,7 @@ def test_attachment_name_with_spaces_invalid():
     assert "Provided name contains whitespaces" in str(excinfo.value)
 
 
-def test_attachment_content_str():
+def test_attachment_content_str_valid():
     """
     Ensure Attachment data validation and from_dict
     creates a valid attachment with encoded content
@@ -116,6 +117,22 @@ def test_attachment_content_str():
     byte_content = bytes(content, "utf-8")
     content_encoded = base64.b64encode(byte_content)
     attachment = cb.Attachment.from_dict({"content": content, "name": "dummy.txt"})
+
+    assert attachment.name == "dummy.txt"
+    assert attachment.content == content_encoded
+    assert attachment.content_decoded == byte_content
+
+
+def test_attachment_from_request_valid():
+    """
+    Ensure Attachment data validation and from_request
+    creates a valid attachment with encoded content.
+    """
+    content = "this is an dummy file content"
+    byte_content = bytes(content, "utf-8")
+    content_encoded = base64.b64encode(byte_content)
+    request = AttachmentRequest(content=content, name="dummy.txt")
+    attachment = cb.Attachment.from_request(request)
 
     assert attachment.name == "dummy.txt"
     assert attachment.content == content_encoded
