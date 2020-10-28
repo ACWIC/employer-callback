@@ -1,5 +1,5 @@
 # Employer Admin API
-[![codecov](https://codecov.io/gh/ACWIC/employer-callback/branch/master/graph/badge.svg?token=QYL43W2ELE)](undefined)
+[![codecov](https://codecov.io/gh/ACWIC/employer-callback/branch/main/graph/badge.svg?token=QYL43W2ELE)](undefined)
 [![CircleCI](https://circleci.com/gh/ACWIC/employer-callback.svg?style=svg&circle-token=d8c23923ca82ad4e383eaca19010d69fa420f481)](https://circleci.com/gh/circleci/circleci-docs)
 
 This is a reference implementation of a proposed API enabling Aged Care
