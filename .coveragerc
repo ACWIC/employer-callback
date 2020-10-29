@@ -1,6 +1,7 @@
 [run]
 include = app/*
 branch = True
+omit = app/main.py
 
 [html]
 directory = test-reports/cov/
