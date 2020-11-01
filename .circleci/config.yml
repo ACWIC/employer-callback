@@ -11,6 +11,9 @@ orbs:
 jobs:
   build-and-test:
     executor: python/default
+    environment:
+        CALLBACK_BUCKET: put-callbacks-here
+        ENROLMENT_BUCKET: put-enrolments-here
     steps:
       - checkout
       - python/install-packages:
