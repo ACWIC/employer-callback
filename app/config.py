@@ -41,7 +41,6 @@ class Settings(BaseSettings):
         }
 
     class Config:
-        env_file = ".envs/.local/.sls"
         # for details about keep_untouched, see
         # https://github.com/samuelcolvin/pydantic/issues/1241
         keep_untouched = (functools.cached_property,)
