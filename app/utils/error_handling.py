@@ -7,6 +7,10 @@ class S3Exception(Exception):
     pass
 
 
+class CustomBase64Exception(Exception):
+    pass
+
+
 @contextmanager
 def handle_s3_errors():
     try:
@@ -34,3 +38,19 @@ def handle_s3_errors():
             raise S3Exception(
                 f"BotoCoreError! Please check the error message: {exception}"
             )
+
+
+@contextmanager
+def handle_base64_errors():
+    try:
+        yield
+    except TypeError as error:
+        raise CustomBase64Exception(
+            f"TypeError! Please check the error message: {error}"
+        )
+    except SyntaxError as error:
+        raise CustomBase64Exception(
+            f"SyntaxError! Please check the error message: {error}"
+        )  # noqa - pytest raises error during the test collection
+    except Exception as exception:
+        raise Exception(f"Unknown Error! Please check the error message: {exception}")

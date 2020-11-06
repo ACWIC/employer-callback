@@ -1,8 +1,17 @@
+from typing import List, Optional
+
 from app.requests import ValidRequest
 
 
+class AttachmentRequest(ValidRequest):
+    name: str
+    content: str
+
+
 class CallbackRequest(ValidRequest):
-    enrolment_id: str
+    sender_sequence: int
+    message_type_version: str
     shared_secret: str
-    tp_sequence: int
-    payload: dict
+    enrolment_id: str
+    structured_data: dict
+    attachments: Optional[List[AttachmentRequest]]

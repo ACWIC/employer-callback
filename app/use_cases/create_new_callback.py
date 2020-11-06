@@ -1,12 +1,10 @@
-from datetime import datetime
-
 from pydantic import BaseModel
 
+from app.domain.entities.callback import Callback
 from app.repositories.callback_repo import CallbackRepo
 from app.repositories.s3_enrolment_repo import EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
 from app.responses import ResponseFailure, ResponseSuccess, SuccessType
-from app.utils import Random
 
 
 class CreateNewCallback(BaseModel):
@@ -20,14 +18,6 @@ class CreateNewCallback(BaseModel):
         arbitrary_types_allowed = True
 
     def execute(self, request: CallbackRequest):
-        params = {
-            "callback_id": Random.get_uuid(),
-            "enrolment_id": request.enrolment_id,
-            "shared_secret": request.shared_secret,
-            "tp_sequence": request.tp_sequence,
-            "payload": request.payload,
-            "received": datetime.now(),
-        }
         try:
             enrolment_object = self.enrolment_repo.get_enrolment(
                 enrolment_id=request.enrolment_id
@@ -38,15 +28,14 @@ class CreateNewCallback(BaseModel):
                 return ResponseFailure.build_from_unauthorised_error(
                     message="'shared_secret' key doesn't match"
                 )
-
-            if self.callback_repo.callback_exists(params):
+            cb = Callback.from_request(request)
+            if self.callback_repo.callback_exists(cb):
                 code = SuccessType.SUCCESS
                 message = "The callback has been fetched from the server."
             else:
                 code = SuccessType.CREATED
                 message = "The callback has been saved."
-            callback = self.callback_repo.save_callback(params)
-            print(callback)
+            callback = self.callback_repo.save_callback(request)
         except Exception as e:
             return ResponseFailure.build_from_resource_error(message=e)
 

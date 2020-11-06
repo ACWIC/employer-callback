@@ -1,4 +1,4 @@
-from app.requests.callback_requests import CallbackRequest
+from tests.test_data.callback_provider import CallbackDataProvider
 
 
 def test_new_callback_request():
@@ -6,17 +6,25 @@ def test_new_callback_request():
     When a NewCallbackRequest is instantiated,
     the resulting object should have correct attribute values.
     """
-    # dummy data
-    shared_secret = "employer_made_this"
-    e_id = "employer_made_this"
-    tp_seq = 76543567
-    pl = {"days": "hapy"}
+    request = CallbackDataProvider().sample_callback_request
 
-    request = CallbackRequest(
-        enrolment_id=e_id, shared_secret=shared_secret, tp_sequence=tp_seq, payload=pl
-    )
+    assert isinstance(request.sender_sequence, int)
+    assert isinstance(request.message_type_version, str)
+    assert isinstance(request.shared_secret, str)
+    assert isinstance(request.enrolment_id, str)
+    assert isinstance(request.structured_data, dict)
 
-    assert request.enrolment_id == e_id
-    assert request.shared_secret == shared_secret
-    assert request.tp_sequence == tp_seq
-    assert request.payload == pl
+
+def test_new_callback_request_with_attachment():
+    """
+    When a NewCallbackRequest is instantiated,
+    the resulting object should have correct attribute values.
+    """
+    request = CallbackDataProvider().sample_callback_request_with_attachment
+
+    assert isinstance(request.sender_sequence, int)
+    assert isinstance(request.message_type_version, str)
+    assert isinstance(request.shared_secret, str)
+    assert isinstance(request.enrolment_id, str)
+    assert isinstance(request.structured_data, dict)
+    assert isinstance(request.attachments, list)

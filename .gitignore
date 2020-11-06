@@ -51,6 +51,10 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+test-reports/
+
+# Editors config
+.vscode/
 
 # Translations
 *.mo

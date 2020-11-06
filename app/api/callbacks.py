@@ -11,7 +11,7 @@ callback_repo = S3CallbackRepo()
 enrolment_repo = S3EnrolmentRepo()
 
 
-@router.post("/callbacks", status_code=SuccessType.CREATED)
+@router.post("/callbacks", status_code=SuccessType.CREATED.value)
 def create_callback(inputs: CallbackRequest):
     """Message from Training Provider to Employer.
 

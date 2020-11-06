@@ -16,6 +16,10 @@ test_data = CallbackDataProvider()
 
 
 def test_create_new_callback_success():
+    """
+    Ensure that creating a new callback with CreateNewCallback
+    use case produces a valid response.
+    """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=EnrolmentRepo)
     callback = test_data.sample_callback
@@ -58,6 +62,11 @@ def test_create_new_callback_idempotence():
 
 
 def test_create_new_callback_failure():
+    """
+    When creating a new enrollment authorization,
+    if there is some kind of error,
+    the response type should be "ResourceError".
+    """
     repo = mock.Mock(spec=CallbackRepo)
     enrolment_repo = mock.Mock(spec=S3EnrolmentRepo)
     enrolment = test_data.sample_enrolment
