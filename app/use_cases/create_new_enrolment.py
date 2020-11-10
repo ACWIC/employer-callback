@@ -1,11 +1,8 @@
-from datetime import datetime
-
 from pydantic import BaseModel
 
 from app.repositories.enrolment_repo import EnrolmentRepo
 from app.requests.enrolment_requests import NewEnrolmentRequest
-from app.responses import ResponseFailure, ResponseSuccess
-from app.utils import Random
+from app.responses import ResponseFailure, ResponseSuccess, SuccessType
 
 
 class CreateNewEnrolment(BaseModel):
@@ -19,24 +16,19 @@ class CreateNewEnrolment(BaseModel):
 
     def execute(self, request: NewEnrolmentRequest):
 
-        internal_reference = request.internal_reference
-        if not self.enrolment_repo.is_reference_unique(
-            Random.get_str_hash(internal_reference)
-        ):
-            return ResponseFailure.validation_error(
-                message=f"internal_reference {internal_reference} is already used."
-            )
-
-        params = {
-            "enrolment_id": Random.get_uuid(),
-            "shared_secret": Random.get_uuid(),
-            "internal_reference": internal_reference,
-            "created": datetime.now(),
-        }
-
         try:
-            enrolment = self.enrolment_repo.save_enrolment(params)
-        except Exception as e:  # noqa - TODO: handle specific failure types
+            # No two enrolments may use the same internal_reference,
+            # for the same employer
+            if not self.enrolment_repo.is_reference_unique(request.internal_reference):
+                return ResponseFailure.build_from_validation_error(
+                    message="internal_reference "
+                    + request.internal_reference
+                    + " is already used."
+                )
+            enrolment = self.enrolment_repo.create_enrolment(request.internal_reference)
+            code = SuccessType.CREATED
+            message = "The enrolment has been created."
+        except Exception as e:
             return ResponseFailure.build_from_resource_error(message=e)
 
-        return ResponseSuccess(value=enrolment)
+        return ResponseSuccess(value=enrolment, message=message, type=code)

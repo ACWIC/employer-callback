@@ -1,57 +1,46 @@
-"""
-These tests evaluate (and document) the business logic.
-"""
-from datetime import datetime
 from unittest import mock
-from uuid import uuid4
 
-from app.domain.entities.enrolment import Enrolment
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.requests.enrolment_requests import NewEnrolmentRequest
 from app.responses import FailureType, SuccessType
 from app.use_cases.create_new_enrolment import CreateNewEnrolment
-
-dummy_key = str(uuid4())
-dummy_created = datetime.now()
-dummy_enrolment = str(uuid4())
-dummy_internal_reference = str(uuid4())
+from tests.test_data.enrolment_data_provider import DataProvider
 
 
-def test_create_new_enrolment_success():
-    """
-    When creating a new enrollment,
-    if everything goes according to plan,
-    the response type should be "Success".
-    """
+def test_create_enrolment_success():
     repo = mock.Mock(spec=S3EnrolmentRepo)
+    internal_reference = DataProvider().internal_reference
     repo.is_reference_unique.return_value = True
+    repo.create_enrolment.return_value = DataProvider().crete_enrolment_response
+    request = NewEnrolmentRequest(internal_reference=internal_reference)
 
-    enrolment = Enrolment(
-        enrolment_id=dummy_enrolment,
-        internal_reference=dummy_internal_reference,
-        shared_secret=dummy_key,
-        created=dummy_created,
-    )
-    repo.save_enrolment.return_value = enrolment
-
-    request = NewEnrolmentRequest(internal_reference=dummy_internal_reference)
     use_case = CreateNewEnrolment(enrolment_repo=repo)
     response = use_case.execute(request)
 
-    assert response.type == SuccessType.SUCCESS
+    assert response.type == SuccessType.CREATED
 
 
-def test_create_new_enrolment_failure():
-    """
-    When creating a new enrollment,
-    if there is some kind of error,
-    the response type should be "ResourceError".
-    """
+def test_create_enrolment_reference_not_unique():
     repo = mock.Mock(spec=S3EnrolmentRepo)
-    repo.is_reference_unique.return_value = True
+    internal_reference = DataProvider().internal_reference
+    repo.is_reference_unique.return_value = False
+    repo.create_enrolment.return_value = DataProvider().crete_enrolment_response
+    request = NewEnrolmentRequest(internal_reference=internal_reference)
 
-    repo.save_enrolment.side_effect = Exception()
-    request = NewEnrolmentRequest(internal_reference=dummy_internal_reference)
+    use_case = CreateNewEnrolment(enrolment_repo=repo)
+    response = use_case.execute(request)
+
+    assert response.type == FailureType.VALIDATION_ERROR
+
+
+def test_create_enrolment_failure():
+    repo = mock.Mock(spec=S3EnrolmentRepo)
+    internal_reference = DataProvider().internal_reference
+    repo.is_reference_unique.return_value = True
+    request = NewEnrolmentRequest(internal_reference=internal_reference)
+
+    repo.create_enrolment.side_effect = Exception()
+
     use_case = CreateNewEnrolment(enrolment_repo=repo)
     response = use_case.execute(request)
 

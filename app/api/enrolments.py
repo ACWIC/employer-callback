@@ -3,10 +3,10 @@ from fastapi import APIRouter, HTTPException
 from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.requests.enrolment_requests import NewEnrolmentRequest
-from app.use_cases.create_new_enrolment import CreateNewEnrolment
-from app.use_cases.get_callbacks_list import GetCallbacksList
-from app.use_cases.get_enrolment import GetEnrolmentByID
-from app.use_cases.get_enrolment_status import GetEnrolmentStatus
+from app.use_cases import create_new_enrolment as cne
+from app.use_cases import get_callbacks_list as gcl
+from app.use_cases import get_enrolment as ge
+from app.use_cases import get_enrolment_status as ges
 
 router = APIRouter()
 enrolment_repo = S3EnrolmentRepo()
@@ -25,7 +25,7 @@ def create_enrolment(inputs: NewEnrolmentRequest):
     and prepare to receive callbacks from the training provider
     about this enrolment.
     """
-    use_case = CreateNewEnrolment(enrolment_repo=enrolment_repo)
+    use_case = cne.CreateNewEnrolment(enrolment_repo=enrolment_repo)
     response = use_case.execute(inputs)
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)
@@ -46,7 +46,7 @@ def get_enrolment_by_id(enrolment_id: str):  # TODO: typing, return enrolment su
       that relate to state changes.
     * use these message-types to calculate the current state
     """
-    use_case = GetEnrolmentByID(enrolment_repo=enrolment_repo)
+    use_case = ge.GetEnrolmentByID(enrolment_repo=enrolment_repo)
     response = use_case.execute(enrolment_id)
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)
@@ -67,7 +67,7 @@ def get_enrolment_status(enrolment_id: str):  # TODO: typing, return enrolment s
       that relate to state changes.
     * use these message-types to calculate the current state
     """
-    use_case = GetEnrolmentStatus(
+    use_case = ges.GetEnrolmentStatus(
         enrolment_repo=enrolment_repo, callback_repo=callback_repo
     )
     response = use_case.execute(enrolment_id)
@@ -89,7 +89,7 @@ def get_callbacks_list_for_enrolment(
       that relate to state changes.
     * use these message-types to calculate the current state
     """
-    use_case = GetCallbacksList(callback_repo=callback_repo)
+    use_case = gcl.GetCallbacksList(callback_repo=callback_repo)
     response = use_case.execute(enrolment_id)
     if bool(response) is False:  # If request failed
         raise HTTPException(status_code=response.type.value, detail=response.message)

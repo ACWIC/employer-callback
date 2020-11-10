@@ -3,6 +3,7 @@ import datetime
 from app.domain.entities.callback import Attachment, Callback
 from app.domain.entities.enrolment import Enrolment
 from app.requests.callback_requests import CallbackRequest
+from app.requests.enrolment_requests import NewEnrolmentRequest
 
 
 class CallbackDataProvider:  # (BaseModel):
@@ -109,4 +110,7 @@ class CallbackDataProvider:  # (BaseModel):
             enrolment_id=self.enrolment_id,
             shared_secret=self.shared_secret,
             internal_reference=self.internal_reference,
+        )
+        self.sample_enrolment_request = NewEnrolmentRequest(
+            internal_reference=self.internal_reference
         )

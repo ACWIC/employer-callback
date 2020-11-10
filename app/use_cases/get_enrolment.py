@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 
+from app.config import settings
 from app.repositories.enrolment_repo import EnrolmentRepo
-from app.responses import ResponseFailure, ResponseSuccess
+from app.responses import ResponseFailure, ResponseSuccess, SuccessType
 
 
 class GetEnrolmentByID(BaseModel):
@@ -12,8 +13,17 @@ class GetEnrolmentByID(BaseModel):
 
     def execute(self, enrolment_id: str):
         try:
+            # check if enrolment exists or not
+            if not self.enrolment_repo.enrolment_exists(
+                enrolment_id, bucket=settings.ENROLMENT_BUCKET
+            ):
+                return ResponseFailure.build_from_validation_error(
+                    message="enrolment_id " + enrolment_id + " is not valid."
+                )
             enrolment = self.enrolment_repo.get_enrolment(enrolment_id=enrolment_id)
-        except Exception as e:  # noqa - TODO: handle specific failure types
+            code = SuccessType.SUCCESS
+            message = "Enrolment has been fetched."
+        except Exception as e:
             return ResponseFailure.build_from_resource_error(message=e)
 
-        return ResponseSuccess(value=enrolment)
+        return ResponseSuccess(value=enrolment, message=message, type=code)
