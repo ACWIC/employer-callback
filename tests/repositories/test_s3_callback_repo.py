@@ -16,7 +16,7 @@ from tests.test_data.boto_client_responses import (
     list_objects_empty_response,
     list_objects_response,
 )
-from tests.test_data.callback_provider import CallbackDataProvider
+from tests.test_data.callback_data_provider import CallbackDataProvider
 
 test_data = CallbackDataProvider()
 

@@ -10,7 +10,7 @@ from app.repositories.enrolment_repo import EnrolmentRepo
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.responses import FailureType, ResponseFailure, SuccessType
 from app.use_cases.create_new_callback import CreateNewCallback
-from tests.test_data.callback_provider import CallbackDataProvider
+from tests.test_data.callback_data_provider import CallbackDataProvider
 
 test_data = CallbackDataProvider()
 

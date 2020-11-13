@@ -1,4 +1,4 @@
-from tests.test_data.callback_provider import CallbackDataProvider
+from tests.test_data.callback_data_provider import CallbackDataProvider
 
 
 def test_new_callback_request():

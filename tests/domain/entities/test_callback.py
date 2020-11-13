@@ -8,7 +8,7 @@ from pydantic import ValidationError
 import app.domain.entities.callback as cb
 from app.requests.callback_requests import AttachmentRequest
 from app.utils import Random
-from tests.test_data.callback_provider import CallbackDataProvider
+from tests.test_data.callback_data_provider import CallbackDataProvider
 
 test_data = CallbackDataProvider()
 
