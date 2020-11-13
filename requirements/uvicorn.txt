@@ -8,6 +8,7 @@ pytest
 pytest-cov
 pytest-sugar
 pytest-flake8
+requests
 
 # debugging
 ipython

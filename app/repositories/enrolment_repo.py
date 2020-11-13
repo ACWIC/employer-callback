@@ -1,15 +1,9 @@
 import abc
 
+from app.domain.entities.enrolment import Enrolment
+
 
 class EnrolmentRepo(abc.ABC):
     @abc.abstractmethod
-    def save_enrolment(self, enrollment: dict) -> None:
-        """"""
-
-    @abc.abstractmethod
-    def get_enrolment(self, enrolment_id: str) -> None:
-        """"""
-
-    @abc.abstractmethod
-    def get_enrolment_status(self, enrolment_id: str) -> None:
+    def get_enrolment(self, enrolment_id: str) -> Enrolment:
         """"""

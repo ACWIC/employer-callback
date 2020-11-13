@@ -4,7 +4,7 @@ from app.repositories.s3_callback_repo import S3CallbackRepo
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
 from app.requests.callback_requests import CallbackRequest
 from app.responses import SuccessType
-from app.use_cases.create_new_callback import CreateNewCallback
+from app.use_cases import create_new_callback as uc
 
 router = APIRouter()
 callback_repo = S3CallbackRepo()
@@ -57,7 +57,7 @@ def create_callback(inputs: CallbackRequest):
       The service will always return the same values
       for recipient-assigned fields (callback_id, received).
     """
-    use_case = CreateNewCallback(
+    use_case = uc.CreateNewCallback(
         callback_repo=callback_repo, enrolment_repo=enrolment_repo
     )
     response = use_case.execute(inputs)

@@ -12,16 +12,11 @@ class CallbackDataProvider:  # (BaseModel):
 
     sample_callback_request: CallbackRequest
     sample_invalid_callback_request: CallbackRequest
-    sample_get_callback_list: dict
-    sample_empty_callback_list: dict
-    callback_repo_list: dict
 
     sample_enrolment: Enrolment
 
     callback_id: str
-    tp_ref: int
     received: datetime
-    payload: dict
     enrolment_id: str
     shared_secret: str
     invalid_shared_secret: str
@@ -73,13 +68,6 @@ class CallbackDataProvider:  # (BaseModel):
         self.sample_callback_dict = self.sample_callback.dict()
         self.sample_get_callback_list = {"callbacks_list": [self.sample_callback]}
         self.sample_empty_callback_list = {"callbacks_list": []}
-
-        self.callback_repo_list = {
-            "callbacks_list": [
-                self.sample_callback.dict(),
-                self.sample_callback_2.dict(),
-            ]
-        }
 
         self.sample_callback_request = CallbackRequest(
             enrolment_id=self.enrolment_id,

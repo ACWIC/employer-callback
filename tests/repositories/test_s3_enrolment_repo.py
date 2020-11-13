@@ -5,17 +5,16 @@ The are testing the encapsulation of the "impure" code
 the repos should return pure domain objects
 of the appropriate type.
 """
-from datetime import datetime
-from unittest.mock import MagicMock, patch
-from uuid import UUID
+from unittest import mock
 
 from app.config import settings
 from app.repositories.s3_enrolment_repo import S3EnrolmentRepo
-from app.utils import Random
-from tests.test_data.callback_provider import CallbackDataProvider
+from tests.test_data.callback_data_provider import CallbackDataProvider
+
+test_data = CallbackDataProvider()
 
 
-@patch("boto3.client")
+@mock.patch("boto3.client")
 def test_s3_initialisation(boto_client):
     """
     Ensure the S3Enrolmentrepo makes a boto3 connection.
@@ -24,110 +23,20 @@ def test_s3_initialisation(boto_client):
     boto_client.assert_called_once()
 
 
-@patch("uuid.uuid4")
-@patch("boto3.client")
-def test_save_enrolment(boto_client, uuid4):
-    """
-    Ensure the S3Enrolmentrepo returns an object with OK data
-    and that an appropriate boto3 put call was made.
-    """
-    fixed_uuid_str = "1dad3dd8-af28-4e61-ae23-4c93a456d10e"
-    uuid4.return_value = UUID(fixed_uuid_str)
+@mock.patch("json.loads")
+@mock.patch("boto3.client")
+def test_get_enrolment(boto_client, json_loads):
     repo = S3EnrolmentRepo()
     settings.ENROLMENT_BUCKET = "some-bucket"
-    enrolment_id = Random.get_uuid()
-    enrolment = {
-        "enrolment_id": enrolment_id,
-        "shared_secret": Random.get_uuid(),
-        "internal_reference": fixed_uuid_str,
-        "created": datetime.now(),
-    }
 
-    enrolment = repo.save_enrolment(enrolment)
+    enrolment_id = test_data.enrolment_id
+    sample_enrolment = test_data.sample_enrolment
 
-    # TODO: mock datetime.datetime.now and assert that too
-    assert str(enrolment.enrolment_id) == enrolment_id
-    assert str(enrolment.internal_reference) == fixed_uuid_str
+    json_loads.return_value = sample_enrolment.dict()
+    enrolment = repo.get_enrolment(enrolment_id)
 
-    enrolment_hash = Random.get_str_hash(enrolment.internal_reference)
-    boto_client.return_value.put_object(
-        Body=bytes(enrolment.json(), "utf-8"),
-        Key=f"employer_reference/{enrolment_hash}/enrolment_id.json",  # NOQA
-        Bucket="some-bucket",
-    )
-    assert boto_client.return_value.put_object.call_count == 3
-
-
-@patch("uuid.uuid4")
-@patch("boto3.client")
-def test_get_enrolment(boto_client, uuid4):
-    """
-    Ensure the S3Enrolmentrepo returns an object with OK data
-    and that an appropriate boto3 put call was made.
-    """
-    print("test_get_enrolment()")
-    fixed_uuid_str = "1dad3dd8-af28-4e61-ae23-4c93a456d10e"
-    fixed_uuid_str_ = "1dad3dd8-af28-4e61-ae23-4c93a456d10e"
-    uuid4.return_value = UUID(fixed_uuid_str)
-    repo = S3EnrolmentRepo()
-    settings.ENROLMENT_BUCKET = "some-bucket"
-    with patch(
-        "json.loads",
-        MagicMock(
-            side_effect=[
-                {
-                    "enrolment_id": "look-at-my-enrolment-id",
-                    "shared_secret": fixed_uuid_str,
-                    "internal_reference": fixed_uuid_str_,
-                    "created": "2020-10-07 15:37:16.727308",
-                }
-            ]
-        ),
-    ):
-        enrolment = repo.get_enrolment(enrolment_id="look-at-my-enrolment-id")
-        print("enrolment", enrolment, type(enrolment))
-
-    print(str(enrolment.created), "2020-10-07 15:37:16.727308")
-    assert str(enrolment.created) == "2020-10-07 15:37:16.727308"
-    assert str(enrolment.enrolment_id) == "look-at-my-enrolment-id"
-    assert str(enrolment.shared_secret) == fixed_uuid_str
-    assert str(enrolment.internal_reference) == fixed_uuid_str_
-
+    assert enrolment == sample_enrolment
     boto_client.return_value.get_object.assert_called_once_with(
-        Key=f"enrolments/{enrolment.enrolment_id}.json", Bucket="some-bucket"  # NOQA
+        Key="enrolments/" + enrolment_id + ".json",
+        Bucket=settings.ENROLMENT_BUCKET,
     )
-
-
-@patch("app.repositories.s3_callback_repo.S3CallbackRepo.get_callbacks_list")
-@patch("uuid.uuid4")
-@patch("boto3.client")
-def test_get_enrolment_status(boto_client, uuid4, callback_repo_list):
-    """
-    Ensure the S3Enrolmentrepo returns an object with OK data
-    and that get_enrolment_status returns appropriate object.
-    """
-    repo = S3EnrolmentRepo()
-    callback_repo_list.return_value = CallbackDataProvider().callback_repo_list
-
-    enrolment_status = repo.get_enrolment_status(
-        enrolment_id="look-at-my-enrolment-id",
-        callbacks_list=callback_repo_list.return_value,
-    )["status"]
-    print("enrolment_status", enrolment_status, type(enrolment_status))
-
-    assert (
-        str(enrolment_status["most_recent_callback"])
-        == CallbackDataProvider().received_str_2
-    )
-    assert str(enrolment_status["total_callbacks"]) == "2"
-
-    callback_repo_list.return_value = {"callbacks_list": []}
-
-    enrolment_status = repo.get_enrolment_status(
-        enrolment_id="look-at-my-enrolment-id",
-        callbacks_list=callback_repo_list.return_value,
-    )["status"]
-
-    print("enrolment_status", enrolment_status, type(enrolment_status))
-    assert str(enrolment_status["most_recent_callback"]) == ""
-    assert str(enrolment_status["total_callbacks"]) == "0"
