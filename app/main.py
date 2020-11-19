@@ -9,7 +9,7 @@ API_GATEWAY_STAGE_PREFIX = os.environ.get("STAGE_PREFIX", default="")
 API_GATEWAY_SERVICE_PREFIX = os.environ.get("SERVICE_PREFIX", default="")
 
 app = FastAPI(
-    title="Enrolments API",
+    title="Employer Callback",
     root_path=API_GATEWAY_STAGE_PREFIX,
     openapi_url=API_GATEWAY_SERVICE_PREFIX + "/openapi.json",
     docs_url=API_GATEWAY_SERVICE_PREFIX + "/docs",
