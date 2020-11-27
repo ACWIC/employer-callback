@@ -18,12 +18,13 @@ def create_callback(inputs: CallbackRequest):
     Contains information about the delivery of training services,
     is linked to student identity and employer context by enrolment_id.
 
-    POSTing a callback is a synchronous proccess
+    POSTing a callback is a synchronous process
     that immediately succeeds (or fails).
 
     The API validates the callback:
 
     * The posted *payload* must confirm with the CallbackRequest schema.
+    * The posted *attachment* in the *payload* must confirm with the AttachmentRequest schema.
     * The *enrollment_id* parameter must be well known to the employer.
       This is a kind of "correlation id" used to associate messages.
     * The provided *key* must be valid for that enrolment_id.
@@ -45,17 +46,6 @@ def create_callback(inputs: CallbackRequest):
       against which the payload could be validated.
       It could also be used by the recipient
       to process the data that is sent to them.
-    * Currently, the "payload" is a dictionary
-      (list of key/value pairs).
-      Probably better for it to be a base64 encoded string,
-      which would support arbitrary message-types in the future.
-    * Document idempotency; If we have this already,
-      we respond as though this is the first time we ever saw it.
-      Astute repeat senders may notice the wall-clock is a bit odd.
-      Error unless the message-type (when it exists),
-      enrolment_id, payload and tp_sequence match.
-      The service will always return the same values
-      for recipient-assigned fields (callback_id, received).
     """
     use_case = uc.CreateNewCallback(
         callback_repo=callback_repo, enrolment_repo=enrolment_repo
