@@ -12,7 +12,7 @@ to send arbitary messages.
 
 This employer-callback microservice is used
 in conjunction with the employer-admin microservice.
-Together, these two microservices can be deployed 
+Together, these two microservices can be deployed
 by an Aged Care Provider as a proxy for
 interactions with one or many Training Providers.
 Examples of how to deploy this microservice
