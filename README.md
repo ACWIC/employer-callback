@@ -11,7 +11,7 @@ in relation to specific enrolments.
 See the Swagger API documentation:
 
 * [Development version](https://ngkkz39vx8.execute-api.us-east-1.amazonaws.com/dev/cb/docs)
-* [Pr](https://prekb2sflh.execute-api.us-east-1.amazonaws.com/prod/cb/docs)
+* [Preview version](https://prekb2sflh.execute-api.us-east-1.amazonaws.com/prod/cb/docs)
 
 This is a companion service to
 - [Employer Admin](https://github.com/ACWIC/employer-admin)
