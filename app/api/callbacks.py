@@ -37,15 +37,6 @@ def create_callback(inputs: CallbackRequest):
     * The returned object contains a *received" date-time stamp,
       from the recipient's wall clock.
       Like callback_id, this may be useful in debugging.
-
-    TODO:
-
-    * we probably need to design a "message-type" attribute
-      (to the CallbackRequest, i.e. sent with the POST).
-      This could be used to identify the schema
-      against which the payload could be validated.
-      It could also be used by the recipient
-      to process the data that is sent to them.
     """
     use_case = uc.CreateNewCallback(
         callback_repo=callback_repo, enrolment_repo=enrolment_repo
